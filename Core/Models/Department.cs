@@ -15,8 +15,8 @@ namespace Core.Models
 
         public string? Name { get; set; }
 
-        public ICollection<Team>? TeamList{ get; set; }
+        public List<Team>? TeamList{ get; set; }
 
-        public ICollection<User>? UserList{ get; set; }
+        public List<User>? UserList{ get; set; }
     }
 }

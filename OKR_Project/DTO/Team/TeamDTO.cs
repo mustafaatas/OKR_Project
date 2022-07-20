@@ -10,6 +10,6 @@ namespace API.DTO.Team
 
         public int? DepartmentId { get; set; }
 
-        public ICollection<User>? UserList { get; set; }
+        public List<User>? UserList { get; set; }
     }
 }

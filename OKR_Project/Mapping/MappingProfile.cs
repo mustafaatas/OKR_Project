@@ -33,6 +33,7 @@ namespace API.Mapping
             CreateMap<SaveArtistDTO, Artist>();
             CreateMap<SaveDepartmentDTO, Department>();
             CreateMap<SaveKeyResultDTO, KeyResult>();
+            CreateMap<UpdateKeyResultDTO, KeyResult>();
             CreateMap<SaveObjectiveDTO, Objective>();
             CreateMap<SaveTeamDTO, Team>();
 

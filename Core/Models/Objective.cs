@@ -28,8 +28,8 @@ namespace Core.Models
 
         public Objective? SurObjective { get; set; }
 
-        public ICollection<Objective>? SubObjectiveList { get; set; }
+        public List<Objective>? SubObjectiveList { get; set; }
 
-        public ICollection<KeyResult>? KeyResultList { get; set; }
+        public List<KeyResult>? KeyResultList { get; set; }
     }
 }

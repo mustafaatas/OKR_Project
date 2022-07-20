@@ -16,8 +16,8 @@ namespace API.DTO.Objective
 
         //public Core.Models.Objective? SurObjective { get; set; }
 
-        //public ICollection<Core.Models.Objective>? SubObjectiveList { get; set; }
+        //public List<Core.Models.Objective>? SubObjectiveList { get; set; }
 
-        //public ICollection<Core.Models.KeyResult>? KeyResultList { get; set; }
+        //public List<Core.Models.KeyResult>? KeyResultList { get; set; }
     }
 }

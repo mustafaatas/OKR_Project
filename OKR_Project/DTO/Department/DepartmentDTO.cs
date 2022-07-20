@@ -11,6 +11,6 @@ namespace API.DTO.Department
 
         public List<Core.Models.Team>? TeamList { get; set; }
 
-        public ICollection<User>? UserList { get; set; }
+        public List<User>? UserList { get; set; }
     }
 }

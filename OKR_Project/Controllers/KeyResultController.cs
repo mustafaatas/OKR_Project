@@ -52,16 +52,14 @@ namespace API.Controllers
             var newKeyResult = await _keyResultService.CreateKeyResult(keyResultToCreate);
             var keyResult = await _keyResultService.GetKeyResultById(newKeyResult.Id);
             var keyResultResource = _mapper.Map<KeyResult, KeyResultDTO>(keyResult);
-            return Ok(keyResultResource);
-           
-
+            return Ok(keyResultResource);       
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<KeyResultDTO>> UpdateKeyResult(int id, [FromBody] SaveKeyResultDTO saveKeyResultResource)
+        public async Task<ActionResult<KeyResultDTO>> UpdateKeyResult(int id, [FromBody] UpdateKeyResultDTO updateKeyResultResource)
         {
-            var validator = new SaveKeyResultResourceValidator();
-            var validationResult = await validator.ValidateAsync(saveKeyResultResource);
+            var validator = new UpdateKeyResultValidator();
+            var validationResult = await validator.ValidateAsync(updateKeyResultResource);
 
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
@@ -71,7 +69,7 @@ namespace API.Controllers
             if (keyResultToBeUpdated == null)
                 return NotFound();
 
-            var keyResult = _mapper.Map<SaveKeyResultDTO, KeyResult>(saveKeyResultResource);
+            var keyResult = _mapper.Map<UpdateKeyResultDTO, KeyResult>(updateKeyResultResource);
             await _keyResultService.UpdateKeyResult(keyResultToBeUpdated, keyResult);
             var updatedKeyResult = await _keyResultService.GetKeyResultById(id);
             var updatedKeyResultResource = _mapper.Map<KeyResult, KeyResultDTO>(updatedKeyResult);

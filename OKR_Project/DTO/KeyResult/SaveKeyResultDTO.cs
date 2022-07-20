@@ -9,9 +9,9 @@ namespace API.DTO.KeyResult
 
         public string Description { get; set; }
 
-        //[DataType(DataType.Date)]
-        //[DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
-        //public DateTime? Deadline { get; set; }
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
+        public DateTime? Deadline { get; set; }
 
         public string MeasurementUnit { get; set; }
 
@@ -19,11 +19,11 @@ namespace API.DTO.KeyResult
 
         public float TargetValue { get; set; }
 
-        //public float? Interval { get { return TargetValue - StartValue; } }
+        public float Interval { get { return TargetValue - StartValue; } }
 
-        public float ActualValue { get; set; }
+        //public float ActualValue { get; set; }
 
-        public string Status { get; set; }
+        //public string Status { get; set; }
 
         public int SurObjectiveId { get; set; }
     }

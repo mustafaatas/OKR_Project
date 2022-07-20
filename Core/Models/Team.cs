@@ -19,6 +19,6 @@ namespace Core.Models
 
         public Department? Department { get; set; }
 
-        public ICollection<User>? UserList { get; set; }
+        public List<User>? UserList { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -19,11 +20,12 @@ namespace Core.Models
 
         public float TargetValue { get; set; }
 
+        [NotMapped]
         public float Interval { get { return TargetValue - StartValue; } }
 
         public float ActualValue { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         public int SurObjectiveId { get; set; }
 
