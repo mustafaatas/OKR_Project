@@ -1,5 +1,6 @@
 ﻿using API.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -28,6 +29,11 @@ namespace API.Extensions
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(2);
+            });
 
             return services;
         }

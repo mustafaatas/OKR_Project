@@ -32,7 +32,7 @@ namespace API.Controllers
         }
 
         [HttpPost("Signup")]
-        public async Task<IActionResult> SignUp(UserSignUpDTO userSignUpResource)
+        public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
             var user = _mapper.Map<UserSignUpDTO, User>(userSignUpResource);
             var userCreateResult = await _userManager.CreateAsync(user, userSignUpResource.Password);
@@ -99,6 +99,12 @@ namespace API.Controllers
         public async Task<IActionResult> AddUserToRole(string userEmail, [FromBody] string roleName)
         {
             var user = _userManager.Users.SingleOrDefault(u => u.UserName == userEmail);
+            //var str = user.RoleId;
+            //if ()
+            //{
+            //    var role = await _roleManager.FindByNameAsync(user.Role.Name);
+            //    var deletedRole = await _roleManager.DeleteAsync(role);
+            //};
             var result = await _userManager.AddToRoleAsync(user, roleName);
 
             if (result.Succeeded)
@@ -107,6 +113,54 @@ namespace API.Controllers
             }
 
             return Problem(result.Errors.First().Description, null, 500);
+        }
+
+        [HttpPost("ResetPasswordToken")]
+        public async Task<IActionResult> RestPasswordToken([FromBody] ResetPasswordTokenDTO model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new Response { Status = "Error", Message = "User does not exists!" });
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            return Ok(new { token = token});
+        }
+
+        [HttpPost("ResetPasswordUser")]
+        public async Task<IActionResult> ResetPasswordToken([FromBody] ResetPasswordDTO model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            if (string.Compare(model.NewPassword, model.ConfirmNewPassword) != 0)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "The new password and confirm new password does not match!" });
+            }
+
+            if (string.IsNullOrEmpty(model.Token))
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Invalid Token!"});
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = new List<string>();
+
+                foreach (var error in result.Errors)
+                {
+                    errors.Add(error.Description);
+                }
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = String.Join(",", errors) });
+            }
+
+            return Ok(new Response { Status = "Success", Message = "Password Reseted Successfully!" });
         }
 
         private string GenerateJwt(User user, IList<string> roles)
