@@ -46,7 +46,6 @@ namespace Service
             objectiveToBeUpdated.Title = objective.Title;
             objectiveToBeUpdated.Description = objective.Description;
             objectiveToBeUpdated.OwnerId = objective.OwnerId;
-            objectiveToBeUpdated.DepartmentId = objective.DepartmentId;
             objectiveToBeUpdated.TeamId = objective.TeamId;
 
             await _unitOfWork.CommitAsync();

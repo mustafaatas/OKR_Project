@@ -11,6 +11,9 @@
   "profiles": {
     "OKR_Project": {
       "commandName": "Project",
+      "commands": {
+        "web": "Microsoft.AspNet.Server.Kestrel"
+      },
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
