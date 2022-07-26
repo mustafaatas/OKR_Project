@@ -54,7 +54,15 @@ namespace Data
                 .HasForeignKey(s => s.SurObjectiveId)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
+            builder.Entity<Objective>().HasKey(x => x.Id);
+            builder
+                .Entity<Objective>()
+                .HasOne<Objective>(o => o.SurObjective)
+                .WithMany(x => x.SubObjectiveList)
+                .HasForeignKey(o => o.SurObjectiveId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<User>().HasKey(x => x.Id);
             builder
                 .Entity<User>()

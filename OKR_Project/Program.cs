@@ -8,21 +8,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Service;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
-//builder.Services.AddCors(options =>
-//    {
-//        options.AddPolicy(name: "_myAllowSpecificOrigins",
-//        b =>
-//        {
-//            b
-//            .AllowAnyOrigin()
-//            .AllowAnyMethod()
-//            .AllowAnyHeader();
-//        });
-//    });
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
 
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -39,22 +34,26 @@ builder.Services.AddSwaggerGen(options =>
             Name = "Authorization",
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.ApiKey,
-        }); var security =
-            new OpenApiSecurityRequirement
-            {
+        }); 
+
+        var security = new OpenApiSecurityRequirement
         {
-            new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Id = "Bearer",
-                    Type = ReferenceType.SecurityScheme
-                },
-                UnresolvedReference = true
-            },
-            new List<string>()
-        }
-            };
+                new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Id = "Bearer",
+                            Type = ReferenceType.SecurityScheme
+                        },
+
+                    UnresolvedReference = true
+                    },
+
+                new List<string>()
+            }
+        };
+
         options.AddSecurityRequirement(security);
         options.SwaggerDoc("v1", new OpenApiInfo { Title = "Music Market", Version = "v1" });
     });
@@ -68,7 +67,6 @@ builder.Services.AddTransient<IObjectiveService, ObjectiveService>();
 builder.Services.AddTransient<ITeamService, TeamService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
-
 
 builder.Services.AddIdentity<User, Role>(options =>
     {
@@ -86,6 +84,8 @@ builder.Services.AddAuth(jwtSettings);
 
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -96,7 +96,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//app.UseCors("_myAllowSpecificOrigins");
+app.UseCors("corsapp");
 
 app.UseAuthorization();
 

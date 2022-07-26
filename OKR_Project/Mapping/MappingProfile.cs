@@ -3,6 +3,7 @@ using API.DTO.Department;
 using API.DTO.KeyResult;
 using API.DTO.Objective;
 using API.DTO.Team;
+using API.DTO.UserDTO;
 using AutoMapper;
 using Core.Auth;
 using Core.Models;
@@ -20,6 +21,7 @@ namespace API.Mapping
             CreateMap<KeyResult, KeyResultDTO>();
             CreateMap<Objective, ObjectiveDTO>();
             CreateMap<Team, TeamDTO>();
+            CreateMap<User, UpdateUserDTO>();
 
             // Resource to Domain
             CreateMap<MusicDTO, Music>();
@@ -36,6 +38,7 @@ namespace API.Mapping
             CreateMap<UpdateKeyResultDTO, KeyResult>();
             CreateMap<SaveObjectiveDTO, Objective>();
             CreateMap<SaveTeamDTO, Team>();
+            CreateMap<UpdateUserDTO, User>();
 
             CreateMap<UserSignUpDTO, User>()
             .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));

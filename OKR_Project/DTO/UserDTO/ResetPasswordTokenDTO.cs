@@ -1,4 +1,4 @@
-﻿namespace API.DTO
+﻿namespace API.DTO.UserDTO
 {
     public class ResetPasswordTokenDTO
     {

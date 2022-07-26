@@ -1,11 +1,14 @@
 ﻿using API.DTO;
+using API.DTO.UserDTO;
 using API.Settings;
 using AutoMapper;
 using Core.Auth;
+using Core.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -21,17 +24,19 @@ namespace API.Controllers
         private readonly SignInManager<User> _signManager;
         private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
+        private readonly IUserService _userService;
 
-        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings)
+        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService)
         {
             _mapper = mapper;
             _userManager = userManager;
             _roleManager = roleManager;
             _signManager = signManager;
             _jwtSettings = jwtSettings.Value;
+            _userService = userService;
         }
 
-        [HttpPost("Signup")]
+        [HttpPost("AddUser")]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
             var user = _mapper.Map<UserSignUpDTO, User>(userSignUpResource);
@@ -43,6 +48,20 @@ namespace API.Controllers
             }
 
             return Problem(userCreateResult.Errors.First().Description, null, 500);
+        }
+
+        [HttpPut("EditUser")]
+        public async Task<IActionResult> EditUser([FromBody] UpdateUserDTO saveUserResource, string userEmail)
+        {
+            var userToBeUpdated = await _userManager.FindByEmailAsync(userEmail);
+            if (userToBeUpdated == null)
+                return StatusCode(StatusCodes.Status404NotFound, new Response { Status = "Error", Message = "User does not exists!" });
+
+            var user = _mapper.Map<UpdateUserDTO, User>(saveUserResource);
+            await _userService.UpdateUser(userToBeUpdated, user);
+            var updatedUser = await _userManager.FindByEmailAsync(userEmail);
+            var updatedUserResource = _mapper.Map<User, UpdateUserDTO>(updatedUser);
+            return Ok(updatedUserResource);
         }
 
         [HttpPost("Signin")]
@@ -59,7 +78,12 @@ namespace API.Controllers
             if (userSigninResult)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                return Ok(GenerateJwt(user, roles));
+                return Ok(new
+                {
+                    jwt = GenerateJwt(user, roles),
+                    name = user.FirstName,
+                    surname = user.LastName
+                });
             }
 
             return BadRequest("Email or password incorrect.");
@@ -69,7 +93,7 @@ namespace API.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signManager.SignOutAsync();
-            return Ok();
+            return Ok(new Response { Status = "Success", Message = "Logout success!" });
         }
 
         [HttpPost("Roles")]
@@ -89,34 +113,28 @@ namespace API.Controllers
 
             if (roleResult.Succeeded)
             {
-                return Ok();
+                return Ok(new Response { Status = "Success", Message = "Role is Created Successfully!" });
             }
 
             return Problem(roleResult.Errors.First().Description, null, 500);
         }
 
-        [HttpPost("User/{userEmail}/Role")]
-        public async Task<IActionResult> AddUserToRole(string userEmail, [FromBody] string roleName)
-        {
-            var user = _userManager.Users.SingleOrDefault(u => u.UserName == userEmail);
-            //var str = user.RoleId;
-            //if ()
-            //{
-            //    var role = await _roleManager.FindByNameAsync(user.Role.Name);
-            //    var deletedRole = await _roleManager.DeleteAsync(role);
-            //};
-            var result = await _userManager.AddToRoleAsync(user, roleName);
+        //[HttpPost("User/{userEmail}/Role")]
+        //public async Task<IActionResult> AddUserToRole(string userEmail, [FromBody] string roleName)
+        //{
+        //    var user = _userManager.Users.SingleOrDefault(u => u.UserName == userEmail);
+        //    var result = await _userManager.AddToRoleAsync(user, roleName);
 
-            if (result.Succeeded)
-            {
-                return Ok();
-            }
+        //    if (result.Succeeded)
+        //    {
+        //        return Ok();
+        //    }
 
-            return Problem(result.Errors.First().Description, null, 500);
-        }
+        //    return Problem(result.Errors.First().Description, null, 500);
+        //}
 
         [HttpPost("ResetPasswordToken")]
-        public async Task<IActionResult> RestPasswordToken([FromBody] ResetPasswordTokenDTO model)
+        public async Task<IActionResult> ResetPasswordToken([FromBody] ResetPasswordTokenDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -129,7 +147,7 @@ namespace API.Controllers
         }
 
         [HttpPost("ResetPasswordUser")]
-        public async Task<IActionResult> ResetPasswordToken([FromBody] ResetPasswordDTO model)
+        public async Task<IActionResult> ResetPasswordUser([FromBody] ResetPasswordDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -188,6 +206,22 @@ namespace API.Controllers
                 signingCredentials: creds
             );
 
+            //var json = JsonConvert.SerializeObject(Ok(new
+            //{
+            //    token = new JwtSecurityTokenHandler().WriteToken(token),
+            //    expiration = token.ValidTo,
+            //    //userRoles = userRoles.ToList().FirstOrDefault(),
+            //    mail = user.Email
+            //}));
+
+            //return Ok(new
+            //{
+            //    token = new JwtSecurityTokenHandler().WriteToken(token),
+            //    expiration = token.ValidTo,
+            //    mail = user.Email,
+            //    teamId = user.TeamId,
+            //    userId = user.Id
+            //});
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

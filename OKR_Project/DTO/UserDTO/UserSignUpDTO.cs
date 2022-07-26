@@ -1,4 +1,4 @@
-﻿namespace API.DTO
+﻿namespace API.DTO.UserDTO
 {
     public class UserSignUpDTO
     {
@@ -10,7 +10,7 @@
 
         public string Password { get; set; }
 
-        //public Guid RoleId { get; set; }
+        public Guid RoleId { get; set; }
         //public int DepartmentId { get; set; }
     }
 }

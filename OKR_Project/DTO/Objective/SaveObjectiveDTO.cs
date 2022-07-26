@@ -8,6 +8,8 @@ namespace API.DTO.Objective
 
         public string Description { get; set; }
 
+        public int? SurObjectiveId { get; set; }
+
         public Guid OwnerId { get; set; }
 
         public int TeamId { get; set; }
