@@ -10,13 +10,13 @@ namespace Core.Auth
 {
     public class User: IdentityUser<Guid>
     {
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public int? DepartmentId { get; set; }
-        public Department? Department { get; set; }
+        public Department Department { get; set; }
         public int? TeamId { get; set; }
         public Team? Team { get; set; }
         public Guid? RoleId { get; set; }
-        public Role? Role { get; set; }
+        public Role Role { get; set; }
     }
 }

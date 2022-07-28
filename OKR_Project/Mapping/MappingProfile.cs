@@ -39,6 +39,7 @@ namespace API.Mapping
             CreateMap<SaveObjectiveDTO, Objective>();
             CreateMap<SaveTeamDTO, Team>();
             CreateMap<UpdateUserDTO, User>();
+            CreateMap<SaveSubObjectiveDTO, Objective>();
 
             CreateMap<UserSignUpDTO, User>()
             .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));

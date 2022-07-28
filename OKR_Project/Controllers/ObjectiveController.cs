@@ -54,6 +54,22 @@ namespace API.Controllers
             return Ok(objectiveResource);
         }
 
+        [HttpPost("CreateSubObjective")]
+        public async Task<ActionResult<ObjectiveDTO>> CreateSubObjective([FromBody] SaveSubObjectiveDTO saveSubObjectiveResource)
+        {
+            var validator = new SaveSubObjectiveResourceValidator();
+            var validationResult = await validator.ValidateAsync(saveSubObjectiveResource);
+
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
+
+            var subObjectiveToCreate = _mapper.Map<SaveSubObjectiveDTO, Objective>(saveSubObjectiveResource);
+            var newSubObjective = await _objectiveService.CreateObjective(subObjectiveToCreate);
+            var subObjective = await _objectiveService.GetObjectiveById(newSubObjective.Id);
+            var subObjectiveResource = _mapper.Map<Objective, ObjectiveDTO>(subObjective);
+            return Ok(subObjectiveResource);
+        }
+
         [HttpPut("{id}")]
         public async Task<ActionResult<ObjectiveDTO>> UpdateObjective(int id, [FromBody] SaveObjectiveDTO saveObjectiveResource)
         {

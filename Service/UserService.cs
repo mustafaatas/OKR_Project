@@ -44,6 +44,8 @@ namespace Service
         public async Task UpdateUser(User userToBeUpdated, User user)
         {
             userToBeUpdated.RoleId = user.RoleId;
+            userToBeUpdated.DepartmentId = user.DepartmentId;
+            userToBeUpdated.TeamId = user.TeamId;
             await _unitOfWork.CommitAsync();
         }
     }

@@ -61,7 +61,7 @@ namespace Data
                 .HasOne<Objective>(o => o.SurObjective)
                 .WithMany(x => x.SubObjectiveList)
                 .HasForeignKey(o => o.SurObjectiveId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<User>().HasKey(x => x.Id);
             builder

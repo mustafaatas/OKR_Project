@@ -77,16 +77,20 @@ namespace API.Controllers
 
             if (userSigninResult)
             {
-                var roles = await _userManager.GetRolesAsync(user);
+                var role = await _userManager.GetRolesAsync(user);
+
                 return Ok(new
                 {
-                    jwt = GenerateJwt(user, roles),
+                    jwt = GenerateJwt(user, role),
                     name = user.FirstName,
-                    surname = user.LastName
+                    surname = user.LastName,
+                    userRole = user.RoleId,
+                    userTeamName = user.TeamId,
+                    userDepartmentName = user.DepartmentId
                 });
             }
 
-            return BadRequest("Email or password incorrect.");
+            return BadRequest(new Response { Status = "Success", Message = "Email or password incorrect." });
         }
 
         [HttpPost("Logout")]
@@ -206,22 +210,6 @@ namespace API.Controllers
                 signingCredentials: creds
             );
 
-            //var json = JsonConvert.SerializeObject(Ok(new
-            //{
-            //    token = new JwtSecurityTokenHandler().WriteToken(token),
-            //    expiration = token.ValidTo,
-            //    //userRoles = userRoles.ToList().FirstOrDefault(),
-            //    mail = user.Email
-            //}));
-
-            //return Ok(new
-            //{
-            //    token = new JwtSecurityTokenHandler().WriteToken(token),
-            //    expiration = token.ValidTo,
-            //    mail = user.Email,
-            //    teamId = user.TeamId,
-            //    userId = user.Id
-            //});
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
