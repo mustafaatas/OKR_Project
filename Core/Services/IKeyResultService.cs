@@ -9,7 +9,7 @@ namespace Core.Services
 {
     public interface IKeyResultService
     {
-        Task<IEnumerable<KeyResult>> GetAllKeyResults();
+        IQueryable<KeyResult> GetAllKeyResults();
         Task<KeyResult> GetKeyResultById(int id);
         Task<KeyResult> CreateKeyResult(KeyResult newKeyResult);
         Task UpdateKeyResult(KeyResult keyResultToBeUpdated, KeyResult keyResult);

@@ -1,4 +1,5 @@
 ﻿using Core.Auth;
+using Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,11 @@ namespace Core.Services
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> GetAllUsers();
+        IQueryable<User> GetAllUsers();
         Task<User> GetUserById(int id);
         Task<User> CreateUser(User newUser);
         Task UpdateUser(User userToBeUpdated, User user);
         Task DeleteUser(User user);
+        string GetDepartmentOfUser(Guid userId);
     }
 }

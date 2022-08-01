@@ -31,9 +31,9 @@ namespace Service
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<Team>> GetAllTeams()
+        public IQueryable<Team> GetAllTeams()
         {
-            return await _unitOfWork.Teams.GetAllAsync();
+            return _unitOfWork.Teams.GetAllAsync();
         }
 
         public async Task<Team> GetTeamById(int id)

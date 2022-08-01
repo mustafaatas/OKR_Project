@@ -31,9 +31,9 @@ namespace Service
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<Department>> GetAllDepartments()
+        public IQueryable<Department> GetAllDepartments()
         {
-            return await _unitOfWork.Departments.GetAllAsync();
+            return _unitOfWork.Departments.GetAllAsync();
         }
 
         public async Task<Department> GetDepartmentById(int id)

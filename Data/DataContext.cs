@@ -56,19 +56,24 @@ namespace Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Objective>().HasKey(x => x.Id);
-            builder
-                .Entity<Objective>()
-                .HasOne<Objective>(o => o.SurObjective)
-                .WithMany(x => x.SubObjectiveList)
-                .HasForeignKey(o => o.SurObjectiveId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder
+            //    .Entity<Objective>()
+            //    .HasOne<Objective>(o => o.SurObjective)
+            //    .WithMany(x => x.SubObjectiveList)
+            //    .HasForeignKey(o => o.SurObjectiveId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Objective>()
+                .HasMany(i => i.SubObjectiveList)
+                .WithOne(i => i.SurObjective)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<User>().HasKey(x => x.Id);
             builder
                 .Entity<User>()
-                .HasOne<Department>(d => d.Department)
+                .HasOne<Team>(d => d.Team)
                 .WithMany(u => u.UserList)
-                .HasForeignKey(d => d.DepartmentId)
+                .HasForeignKey(d => d.TeamId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
         }

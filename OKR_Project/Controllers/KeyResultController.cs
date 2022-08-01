@@ -24,7 +24,7 @@ namespace API.Controllers
         [HttpGet("")]
         public async Task<ActionResult<IEnumerable<KeyResultDTO>>> GetAllKeyResults()
         {
-            var keyResults = await _keyResultService.GetAllKeyResults();
+            var keyResults = _keyResultService.GetAllKeyResults();
             var keyResultResources = _mapper.Map<IEnumerable<KeyResult>, IEnumerable<KeyResultDTO>>(keyResults);
 
             return Ok(keyResultResources);

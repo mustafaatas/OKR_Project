@@ -1,4 +1,5 @@
-﻿using API.DTO.Objective;
+﻿using API.DTO;
+using API.DTO.Objective;
 using API.Validators;
 using AutoMapper;
 using Core.Models;
@@ -23,7 +24,7 @@ namespace API.Controllers
         [HttpGet("")]
         public async Task<ActionResult<IEnumerable<ObjectiveDTO>>> GetAllObjectives()
         {
-            var objectives = await _objectiveService.GetAllObjectives();
+            var objectives = _objectiveService.GetAllObjectives();
             var objectivesResources = _mapper.Map<IEnumerable<Objective>, IEnumerable<ObjectiveDTO>>(objectives);
 
             return Ok(objectivesResources);

@@ -9,7 +9,7 @@ namespace Core.Services
 {
     public interface IRoleService
     {
-        Task<IEnumerable<Role>> GetAllRoles();
+        IQueryable<Role> GetAllRoles();
         Task<Role> GetRoleById(int id);
         Task<Role> CreateRole(Role newRole);
         Task UpdateRole(Role roleToBeUpdated, Role role);

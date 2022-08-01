@@ -31,9 +31,9 @@ namespace Service
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<Role>> GetAllRoles()
+        public IQueryable<Role> GetAllRoles()
         {
-            return await _unitOfWork.Roles.GetAllAsync();
+            return _unitOfWork.Roles.GetAllAsync();
         }
 
         public async Task<Role> GetRoleById(int id)

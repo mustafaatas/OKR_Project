@@ -23,7 +23,7 @@ namespace API.Controllers
         [HttpGet("")]
         public async Task<ActionResult<IEnumerable<ArtistDTO>>> GetAllArtists()
         {
-            var artists = await _artistService.GetAllArtists();
+            var artists =  _artistService.GetAllArtists();
             var artistResources = _mapper.Map<IEnumerable<Artist>, IEnumerable<ArtistDTO>>(artists);
 
             return Ok(artistResources);

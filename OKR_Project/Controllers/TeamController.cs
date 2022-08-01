@@ -23,7 +23,7 @@ namespace API.Controllers
         [HttpGet("")]
         public async Task<ActionResult<IEnumerable<TeamDTO>>> GetAllTeams()
         {
-            var teams = await _teamService.GetAllTeams();
+            var teams = _teamService.GetAllTeams();
             var teamResources = _mapper.Map<IEnumerable<Team>, IEnumerable<TeamDTO>>(teams);
 
             return Ok(teamResources);

@@ -9,7 +9,7 @@ namespace Core.Services
 {
     public interface IObjectiveService
     {
-        Task<IEnumerable<Objective>> GetAllObjectives();
+        IQueryable<Objective> GetAllObjectives();
         Task<Objective> GetObjectiveById(int id);
         Task<Objective> CreateObjective(Objective newObjective);
         Task UpdateObjective(Objective objectiveToBeUpdated, Objective objective);

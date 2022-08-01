@@ -9,7 +9,7 @@ namespace Core.Services
 {
     public interface ITeamService
     {
-        Task<IEnumerable<Team>> GetAllTeams();
+        IQueryable<Team> GetAllTeams();
         Task<Team> GetTeamById(int id);
         Task<Team> CreateTeam(Team newTeam);
         Task UpdateTeam(Team teamToBeUpdated, Team team);

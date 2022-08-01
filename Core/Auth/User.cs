@@ -12,8 +12,6 @@ namespace Core.Auth
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int? DepartmentId { get; set; }
-        public Department Department { get; set; }
         public int? TeamId { get; set; }
         public Team? Team { get; set; }
         public Guid? RoleId { get; set; }

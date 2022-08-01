@@ -33,14 +33,14 @@ namespace Data.Repositories
             return Context.Set<TEntity>().Where(predicate);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public IQueryable<TEntity> GetAllAsync()
         {
-            return await Context.Set<TEntity>().ToListAsync();
+            return Context.Set<TEntity>().AsQueryable();
         }
 
-        public ValueTask<TEntity> GetByIdAsync(int id)
+        public async ValueTask<TEntity> GetByIdAsync(int id)
         {
-            return Context.Set<TEntity>().FindAsync(id);
+            return await Context.Set<TEntity>().FindAsync(id);
         }
 
         public void Remove(TEntity entity)

@@ -24,7 +24,7 @@ namespace API.Controllers
         [HttpGet("")]
         public async Task<ActionResult<IEnumerable<DepartmentDTO>>> GetAllDepartments()
         {
-            var departments = await _departmentService.GetAllDepartments();
+            var departments = _departmentService.GetAllDepartments();
             var departmentResources = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentDTO>>(departments);
 
             return Ok(departmentResources);

@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220729082942_departmentIdIsDeletedFromUserTable")]
+    partial class departmentIdIsDeletedFromUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,7 +154,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artists", (string)null);
+                    b.ToTable("Artists");
                 });
 
             modelBuilder.Entity("Core.Models.Department", b =>
@@ -169,7 +171,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Core.Models.KeyResult", b =>
@@ -214,7 +216,7 @@ namespace Data.Migrations
 
                     b.HasIndex("SurObjectiveId");
 
-                    b.ToTable("KeyResults", (string)null);
+                    b.ToTable("KeyResults");
                 });
 
             modelBuilder.Entity("Core.Models.Music", b =>
@@ -236,7 +238,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("Musics", (string)null);
+                    b.ToTable("Musics");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>
@@ -273,7 +275,7 @@ namespace Data.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Objectives", (string)null);
+                    b.ToTable("Objectives");
                 });
 
             modelBuilder.Entity("Core.Models.Team", b =>
@@ -295,7 +297,7 @@ namespace Data.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("Teams", (string)null);
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -452,7 +454,7 @@ namespace Data.Migrations
                     b.HasOne("Core.Models.Objective", "SurObjective")
                         .WithMany("SubObjectiveList")
                         .HasForeignKey("SurObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Core.Models.Team", "Team")
                         .WithMany()

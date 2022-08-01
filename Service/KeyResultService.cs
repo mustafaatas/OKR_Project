@@ -31,9 +31,9 @@ namespace Service
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<KeyResult>> GetAllKeyResults()
+        public IQueryable<KeyResult> GetAllKeyResults()
         {
-            return await _unitOfWork.KeyResults.GetAllAsync();
+            return _unitOfWork.KeyResults.GetAllAsync();
         }
 
         public async Task<KeyResult> GetKeyResultById(int id)

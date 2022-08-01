@@ -6,6 +6,7 @@ using Core.Auth;
 using Core.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -67,7 +68,7 @@ namespace API.Controllers
         [HttpPost("Signin")]
         public async Task<IActionResult> SignIn(UserLoginDTO userLoginDto)
         {
-            var user = _userManager.Users.SingleOrDefault(u => u.UserName == userLoginDto.Email);
+            var user = _userManager.Users.Include(x=>x.Role).Include(a=>a.Team).ThenInclude(k=>k.Department).SingleOrDefault(u => u.UserName == userLoginDto.Email);
             if (user is null)
             {
                 return NotFound("User not found");
@@ -84,9 +85,10 @@ namespace API.Controllers
                     jwt = GenerateJwt(user, role),
                     name = user.FirstName,
                     surname = user.LastName,
-                    userRole = user.RoleId,
-                    userTeamName = user.TeamId,
-                    userDepartmentName = user.DepartmentId
+                    userRole = user.Role.Name,
+                    userTeamName = user.Team.Name,
+                    userDepartmentName = user.Team.Department.Name
+                    //userDepartmentName = _userService.GetDepartmentOfUser(user.Id) --> Dogru ve calisiyor
                 });
             }
 
@@ -110,7 +112,7 @@ namespace API.Controllers
 
             var newRole = new Role
             {
-                Name = roleName
+                Name = roleName,
             };
 
             var roleResult = await _roleManager.CreateAsync(newRole);
@@ -122,20 +124,6 @@ namespace API.Controllers
 
             return Problem(roleResult.Errors.First().Description, null, 500);
         }
-
-        //[HttpPost("User/{userEmail}/Role")]
-        //public async Task<IActionResult> AddUserToRole(string userEmail, [FromBody] string roleName)
-        //{
-        //    var user = _userManager.Users.SingleOrDefault(u => u.UserName == userEmail);
-        //    var result = await _userManager.AddToRoleAsync(user, roleName);
-
-        //    if (result.Succeeded)
-        //    {
-        //        return Ok();
-        //    }
-
-        //    return Problem(result.Errors.First().Description, null, 500);
-        //}
 
         [HttpPost("ResetPasswordToken")]
         public async Task<IActionResult> ResetPasswordToken([FromBody] ResetPasswordTokenDTO model)

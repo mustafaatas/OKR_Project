@@ -9,7 +9,7 @@ namespace Core.Services
 {
     public interface IDepartmentService
     {
-        Task<IEnumerable<Department>> GetAllDepartments();
+        IQueryable<Department> GetAllDepartments();
         Task<Department> GetDepartmentById(int id);
         Task<Department> CreateDepartment(Department newDepartment);
         Task UpdateDepartment(Department departmentToBeUpdated, Department department);

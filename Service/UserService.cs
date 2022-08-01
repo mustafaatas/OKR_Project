@@ -1,6 +1,9 @@
 ﻿using Core;
 using Core.Auth;
+using Core.Models;
 using Core.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,9 +34,9 @@ namespace Service
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<User>> GetAllUsers()
+        public IQueryable<User> GetAllUsers()
         {
-            return await _unitOfWork.Users.GetAllAsync();
+            return _unitOfWork.Users.GetAllAsync().Include(i => i.Team).ThenInclude(i => i.Department);
         }
 
         public async Task<User> GetUserById(int id)
@@ -43,10 +46,17 @@ namespace Service
 
         public async Task UpdateUser(User userToBeUpdated, User user)
         {
-            userToBeUpdated.RoleId = user.RoleId;
-            userToBeUpdated.DepartmentId = user.DepartmentId;
-            userToBeUpdated.TeamId = user.TeamId;
+            var x = GetAllUsers().Where(p => p.Id == userToBeUpdated.Id).FirstOrDefault();
+            x.Role.Name = user.Role.Name;
+            //userToBeUpdated.RoleId = user.RoleId;
             await _unitOfWork.CommitAsync();
+        }
+
+        public string GetDepartmentOfUser(Guid userId)
+        {
+            var user = GetAllUsers().Where(p => p.Id == userId).FirstOrDefault();
+
+            return user?.Team?.Department.Name;
         }
     }
 }

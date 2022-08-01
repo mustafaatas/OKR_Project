@@ -9,7 +9,7 @@ namespace Service
 {
     public interface IArtistService
     {
-        Task<IEnumerable<Artist>> GetAllArtists();
+        IQueryable<Artist> GetAllArtists();
         Task<Artist> GetArtistById(int id);
         Task<Artist> CreateArtist(Artist newArtist);
         Task UpdateArtist(Artist artistToBeUpdated, Artist artist);

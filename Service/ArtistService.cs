@@ -30,9 +30,9 @@ namespace Service
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<Artist>> GetAllArtists()
+        public IQueryable<Artist> GetAllArtists()
         {
-            return await _unitOfWork.Artists.GetAllAsync();
+            return _unitOfWork.Artists.GetAllAsync();
         }
 
         public async Task<Artist> GetArtistById(int id)
