@@ -67,6 +67,7 @@ builder.Services.AddTransient<IObjectiveService, ObjectiveService>();
 builder.Services.AddTransient<ITeamService, TeamService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddIdentity<User, Role>(options =>
     {
@@ -85,6 +86,7 @@ builder.Services.AddAuth(jwtSettings);
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
