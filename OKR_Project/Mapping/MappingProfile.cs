@@ -10,7 +10,7 @@ using Core.Models;
 
 namespace API.Mapping
 {
-    public class MappingProfile: Profile
+    public class MappingProfile : Profile
     {
         public MappingProfile()
         {
@@ -18,10 +18,11 @@ namespace API.Mapping
             CreateMap<Music, MusicDTO>();
             CreateMap<Artist, ArtistDTO>();
             CreateMap<Department, DepartmentDTO>();
-            CreateMap<KeyResult, KeyResultDTO>();
+            CreateMap<KeyResult, KeyResultDTO>().ForMember(u => u.Interval, opt => opt.MapFrom(ur => ur.TargetValue - ur.StartValue)); ;
             CreateMap<Objective, ObjectiveDTO>();
             CreateMap<Team, TeamDTO>();
             CreateMap<User, UpdateUserDTO>();
+            CreateMap<User, UserDTO>().ConvertUsing<UserDTOConverter>();
 
             // Resource to Domain
             CreateMap<MusicDTO, Music>();
@@ -30,6 +31,7 @@ namespace API.Mapping
             CreateMap<KeyResultDTO, KeyResult>();
             CreateMap<ObjectiveDTO, Objective>();
             CreateMap<TeamDTO, Team>();
+            CreateMap<UserDTO, User>();
 
             CreateMap<SaveMusicDTO, Music>();
             CreateMap<SaveArtistDTO, Artist>();
@@ -43,6 +45,22 @@ namespace API.Mapping
 
             CreateMap<UserSignUpDTO, User>()
             .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
+        }
+    }
+
+    public class UserDTOConverter : ITypeConverter<User, UserDTO>
+    {
+        public UserDTO Convert(User source, UserDTO destination, ResolutionContext context)
+        {
+            return new UserDTO
+            {
+                Email = source.Email,
+                FirstName = source.FirstName,
+                LastName = source.LastName,
+                RoleId = source.RoleId,
+                TeamId = source.TeamId,
+                DepartmentId = source?.Team?.DepartmentId
+            };
         }
     }
 }

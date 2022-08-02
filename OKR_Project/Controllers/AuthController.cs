@@ -40,6 +40,15 @@ namespace API.Controllers
             _emailService = emailService;
         }
 
+        [HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = _userService.GetAllUsers();
+            var usersResources = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
+
+            return Ok(usersResources);
+        }
+        
         [HttpPost("AddUser")]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {

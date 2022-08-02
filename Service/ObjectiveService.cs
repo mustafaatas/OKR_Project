@@ -26,15 +26,8 @@ namespace Service
             return newObjective;
         }
 
-        //public async Task DeleteObjective(Objective objective)
-        //{
-        //    _unitOfWork.Objectives.Remove(objective);
-        //    await _unitOfWork.CommitAsync();
-        //}
-
         public async Task DeleteObjective(Objective obj)
         {
-            //var objective =  _unitOfWork.Objectives.GetAllAsync().Where(d => d.Id == objectiveId).FirstOrDefault();
             var objective = _unitOfWork.Objectives.GetAllAsync().FirstOrDefault(d => d.Id == obj.Id);
             if (objective == null)
             {

@@ -48,7 +48,6 @@ namespace Service
         {
             var x = GetAllUsers().Where(p => p.Id == userToBeUpdated.Id).FirstOrDefault();
             x.Role.Name = user.Role.Name;
-            //userToBeUpdated.RoleId = user.RoleId;
             await _unitOfWork.CommitAsync();
         }
 
