@@ -3,6 +3,7 @@ using API.DTO.UserDTO;
 using API.Settings;
 using AutoMapper;
 using Core.Auth;
+using Core.Models;
 using Core.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +27,9 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService)
+        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, IEmailService emailService)
         {
             _mapper = mapper;
             _userManager = userManager;
@@ -35,6 +37,7 @@ namespace API.Controllers
             _signManager = signManager;
             _jwtSettings = jwtSettings.Value;
             _userService = userService;
+            _emailService = emailService;
         }
 
         [HttpPost("AddUser")]
@@ -135,7 +138,17 @@ namespace API.Controllers
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            return Ok(new { token = token});
+
+            var x = new Email()
+            {
+                Body = "To password change is you need that token: " + token,
+                ToEmail = model.Email,
+                Subject = "Password Changing"
+            };
+
+            SendEmail(x);
+
+            return Ok(new { ToEmail = model.Email, Subject = "Password Changing", Body = token, Warning = "Please check your mailbox!" });
         }
 
         [HttpPost("ResetPasswordUser")]
@@ -171,6 +184,11 @@ namespace API.Controllers
             }
 
             return Ok(new Response { Status = "Success", Message = "Password Reseted Successfully!" });
+        }
+
+        private void SendEmail(Email emailRequest)
+        {
+            _emailService.SendEmailAsync(emailRequest);
         }
 
         private string GenerateJwt(User user, IList<string> roles)

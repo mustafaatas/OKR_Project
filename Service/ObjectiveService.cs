@@ -26,41 +26,41 @@ namespace Service
             return newObjective;
         }
 
-        public async Task DeleteObjective(Objective objective)
-        {
-            _unitOfWork.Objectives.Remove(objective);
-            await _unitOfWork.CommitAsync();
-        }
-
-        //public async Task DeleteObjective(int objectiveId)
+        //public async Task DeleteObjective(Objective objective)
         //{
-        //    //var objective =  _unitOfWork.Objectives.GetAllAsync().Where(d => d.Id == objectiveId).FirstOrDefault();
-        //    var objective = _unitOfWork.Objectives.GetAllAsync().FirstOrDefault(d => d.Id == objectiveId);
-        //    if (objective == null)
-        //    {
-        //        return;
-        //    }
-
-        //    var objectiveToDelete = await SubObjectives(objective.Id);
-        //    objectiveToDelete.Add(objective);
-
-        //    _unitOfWork.Objectives.RemoveRange(objectiveToDelete);
+        //    _unitOfWork.Objectives.Remove(objective);
         //    await _unitOfWork.CommitAsync();
         //}
 
-        //public async Task<List<Objective>> SubObjectives(int objectiveId)
-        //{
-        //    var subObjectives = await _unitOfWork.Objectives.GetAllAsync().Where(d => d.SurObjectiveId == objectiveId).ToListAsync();
+        public async Task DeleteObjective(Objective obj)
+        {
+            //var objective =  _unitOfWork.Objectives.GetAllAsync().Where(d => d.Id == objectiveId).FirstOrDefault();
+            var objective = _unitOfWork.Objectives.GetAllAsync().FirstOrDefault(d => d.Id == obj.Id);
+            if (objective == null)
+            {
+                return;
+            }
 
-        //    var allObjectives = new List<Objective>();
-        //    foreach (var subObjective in subObjectives)
-        //    {
-        //        allObjectives.Add(subObjective);
-        //        allObjectives.AddRange(await SubObjectives(subObjective.Id));
-        //    }
+            var objectiveToDelete = await DeleteSubObjectives(objective.Id);
+            objectiveToDelete.Add(objective);
 
-        //    return allObjectives;
-        //}
+            _unitOfWork.Objectives.RemoveRange(objectiveToDelete);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task<List<Objective>> DeleteSubObjectives(int objectiveId)
+        {
+            var subObjectives = await _unitOfWork.Objectives.GetAllAsync().Where(d => d.SurObjectiveId == objectiveId).ToListAsync();
+
+            var allObjectives = new List<Objective>();
+            foreach (var subObjective in subObjectives)
+            {
+                allObjectives.Add(subObjective);
+                allObjectives.AddRange(await DeleteSubObjectives(subObjective.Id));
+            }
+
+            return allObjectives;
+        }
 
         public IQueryable<Objective> GetAllObjectives()
         {

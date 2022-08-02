@@ -13,6 +13,6 @@ namespace Core.Services
         Task<Objective> GetObjectiveById(int id);
         Task<Objective> CreateObjective(Objective newObjective);
         Task UpdateObjective(Objective objectiveToBeUpdated, Objective objective);
-        Task DeleteObjective(Objective objective);
+        Task DeleteObjective(Objective obj);
     }
 }
