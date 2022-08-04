@@ -57,9 +57,9 @@ namespace API.Mapping
                 Email = source.Email,
                 FirstName = source.FirstName,
                 LastName = source.LastName,
-                RoleId = source.RoleId,
-                TeamId = source.TeamId,
-                DepartmentId = source?.Team?.DepartmentId
+                RoleName = source?.Role?.Name,
+                TeamName = source?.Team?.Name,
+                DepartmentName = source?.Team?.Department?.Name,
             };
         }
     }

@@ -15,8 +15,8 @@ namespace Core.Models
 
         public string Name { get; set; }
 
-        public List<Team>? TeamList{ get; set; }
+        public List<Team>? TeamList{ get; set; } = new List<Team>();
 
-        public List<User>? UserList{ get; set; }
+        public List<User>? UserList{ get; set; } = new List<User>();
     }
 }

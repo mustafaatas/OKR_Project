@@ -17,6 +17,13 @@ namespace Service
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _config;
+        //private readonly MailMessage _emailSettings;
+
+        //public EmailService(IConfiguration config, MailMessage emailSettings)
+        //{
+        //    _config = config;
+        //    _emailSettings = emailSettings;
+        //}
 
         public EmailService(IConfiguration config)
         {
@@ -37,5 +44,18 @@ namespace Service
             smtp.Send(email);
             smtp.Disconnect(true);
         }
+
+        //public void SendEmailAsync(Email emailRequest)
+        //{
+        //    MailMessage mail = new MailMessage();
+        //    mail.IsBodyHtml = true;
+        //    if (!string.IsNullOrEmpty(_emailSettings.Sender))
+        //    {
+        //        Subject = _emailSettings.Sender;
+        //    }
+
+        //    mail.Subject = new MailAddress(_emailSettings.From, Subject);
+
+        //}
     }
 }

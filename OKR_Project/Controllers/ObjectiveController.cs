@@ -65,6 +65,7 @@ namespace API.Controllers
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
             var subObjectiveToCreate = _mapper.Map<SaveSubObjectiveDTO, Objective>(saveSubObjectiveResource);
+            //var subObj = _objectiveService
             var newSubObjective = await _objectiveService.CreateObjective(subObjectiveToCreate);
             var subObjective = await _objectiveService.GetObjectiveById(newSubObjective.Id);
             var subObjectiveResource = _mapper.Map<Objective, ObjectiveDTO>(subObjective);

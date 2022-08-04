@@ -79,11 +79,18 @@ builder.Services.AddIdentity<User, Role>(options =>
         options.Lockout.MaxFailedAccessAttempts = 5;
     }).AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
 
+//var emailConfig = builder.Configuration
+//        .GetSection("EmailConfiguration")
+//        .Get<EmailConfiguration>();
+//builder.Services.AddSingleton(emailConfig);
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
 builder.Services.AddAuth(jwtSettings);
 
 builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.AddControllers();
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 

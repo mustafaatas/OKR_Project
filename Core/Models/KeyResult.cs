@@ -25,7 +25,7 @@ namespace Core.Models
 
         public float ActualValue { get; set; }
 
-        public string? Status { get; set; }
+        public string? Status { get; set; } = "Open";
 
         public int SurObjectiveId { get; set; }
 

@@ -36,7 +36,7 @@ namespace Service
 
         public IQueryable<User> GetAllUsers()
         {
-            return _unitOfWork.Users.GetAllAsync().Include(i => i.Team).ThenInclude(i => i.Department);
+            return _unitOfWork.Users.GetAllAsync().Include(i => i.Role).Include(i => i.Team).ThenInclude(i => i.Department);
         }
 
         public async Task<User> GetUserById(int id)

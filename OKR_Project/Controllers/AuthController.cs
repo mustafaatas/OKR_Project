@@ -5,6 +5,7 @@ using AutoMapper;
 using Core.Auth;
 using Core.Models;
 using Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -41,14 +42,15 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
             var users = _userService.GetAllUsers();
             var usersResources = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
 
             return Ok(usersResources);
         }
-        
+
+        //[Authorize(Roles = "Admin")]
         [HttpPost("AddUser")]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
@@ -94,13 +96,13 @@ namespace API.Controllers
 
                 return Ok(new
                 {
-                    jwt = GenerateJwt(user, role),
-                    name = user.FirstName,
-                    surname = user.LastName,
-                    userRole = user.Role.Name,
-                    userTeamName = user.Team.Name,
-                    userDepartmentName = user.Team.Department.Name
-                    //userDepartmentName = _userService.GetDepartmentOfUser(user.Id) --> Dogru ve calisiyor
+                    Jwt = GenerateJwt(user, role),
+                    Name = user.FirstName,
+                    Surname = user.LastName,
+                    UserRole = user.Role.Name,
+                    UserTeamName = user?.Team?.Name,
+                    UserDepartmentName = user?.Team?.Department?.Name
+                    //UserDepartmentName = _userService.GetDepartmentOfUser(user.Id) --> Dogru ve calisiyor
                 });
             }
 

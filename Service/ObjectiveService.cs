@@ -33,6 +33,7 @@ namespace Service
             {
                 return;
             }
+            CheckSubObjectives(obj);
 
             var objectiveToDelete = await DeleteSubObjectives(objective.Id);
             objectiveToDelete.Add(objective);
@@ -73,6 +74,23 @@ namespace Service
             objectiveToBeUpdated.TeamId = objective.TeamId;
 
             await _unitOfWork.CommitAsync();
+        }
+
+        public bool CheckSubObjectives(Objective objective)
+        {
+            var surObjective = _unitOfWork.Objectives.GetAllAsync().Where(e => e.Id == objective.SurObjectiveId).ToList(); // get parent from child
+            //var subObjectives = _unitOfWork.Objectives.GetAllAsync().Where(e => objective.SubObjectiveList.Any()).ToList();
+
+            //var keyResults = _unitOfWork.KeyResults.GetAllAsync().Where(e => e.).ToList();
+
+            var keyResult = surObjective.Where(e => e.KeyResultList == objective.KeyResultList).ToList();
+
+            if(keyResult == null)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

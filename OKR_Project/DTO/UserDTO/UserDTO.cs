@@ -1,4 +1,6 @@
-﻿namespace API.DTO.UserDTO
+﻿using Core.Auth;
+
+namespace API.DTO.UserDTO
 {
     public class UserDTO
     {
@@ -8,10 +10,12 @@
 
         public string LastName { get; set; }
 
-        public int? TeamId { get; set; }
+        public string? TeamName { get; set; }
 
-        public int? DepartmentId { get; set; }
+        public string? DepartmentName { get; set; }
 
-        public Guid? RoleId { get; set; }
+        public string? RoleName { get; set; }
+
+        public Role? Role { get; set; }
     }
 }
