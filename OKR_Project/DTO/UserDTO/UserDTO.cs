@@ -16,6 +16,6 @@ namespace API.DTO.UserDTO
 
         public string? RoleName { get; set; }
 
-        public Role? Role { get; set; }
+        //public Role? Role { get; set; }
     }
 }

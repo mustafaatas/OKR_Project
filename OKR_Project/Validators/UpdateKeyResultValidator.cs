@@ -7,7 +7,7 @@ namespace API.Validators
     {
         public UpdateKeyResultValidator()
         {
-
+            RuleFor(k => k.ActualValue).GreaterThan(0).When(k => k.Status == "Completed");
         }
     }
 }

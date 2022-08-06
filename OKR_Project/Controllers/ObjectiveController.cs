@@ -5,6 +5,7 @@ using AutoMapper;
 using Core.Models;
 using Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -64,8 +65,11 @@ namespace API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
+            var isHaveKeyResults = _objectiveService.GetAllObjectives().Where(i => i.Id == saveSubObjectiveResource.SurObjectiveId).Include(i => i.KeyResultList).FirstOrDefault().KeyResultList.Any();
+            if (isHaveKeyResults)
+                return BadRequest(new Response { Status = "Error", Message = "Cannot added Subobjective when exist Key Results." });
+
             var subObjectiveToCreate = _mapper.Map<SaveSubObjectiveDTO, Objective>(saveSubObjectiveResource);
-            //var subObj = _objectiveService
             var newSubObjective = await _objectiveService.CreateObjective(subObjectiveToCreate);
             var subObjective = await _objectiveService.GetObjectiveById(newSubObjective.Id);
             var subObjectiveResource = _mapper.Map<Objective, ObjectiveDTO>(subObjective);

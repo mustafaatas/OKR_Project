@@ -48,6 +48,18 @@ namespace API.Controllers
             var usersResources = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
 
             return Ok(usersResources);
+
+            //var usersDto = _userService.GetAllUsers()
+            //    .Select(p => new
+            //    {
+            //        Id = p.Id,
+            //        FirstName = p.FirstName,
+            //        LastName = p.LastName,
+            //        Email = p.Email,
+            //        Department = p.Team.Department.Name,
+            //        Role = p.Role.Name
+            //    }).ToList();
+            //return Ok(usersDto);
         }
 
         //[Authorize(Roles = "Admin")]
@@ -82,7 +94,7 @@ namespace API.Controllers
         [HttpPost("Signin")]
         public async Task<IActionResult> SignIn(UserLoginDTO userLoginDto)
         {
-            var user = _userManager.Users.Include(x=>x.Role).Include(a=>a.Team).ThenInclude(k=>k.Department).SingleOrDefault(u => u.UserName == userLoginDto.Email);
+            var user = _userService.GetAllUsers().SingleOrDefault(u => u.UserName == userLoginDto.Email);
             if (user is null)
             {
                 return NotFound("User not found");

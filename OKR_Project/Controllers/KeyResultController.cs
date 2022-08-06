@@ -1,10 +1,13 @@
-﻿using API.DTO.KeyResult;
+﻿using API.DTO;
+using API.DTO.KeyResult;
 using API.Validators;
 using AutoMapper;
 using Core.Models;
 using Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -13,12 +16,14 @@ namespace API.Controllers
     public class KeyResultController : ControllerBase
     {
         private readonly IKeyResultService _keyResultService;
+        private readonly IObjectiveService _objectiveService;
         private readonly IMapper _mapper;
 
-        public KeyResultController(IKeyResultService keyResultService, IMapper mapper)
+        public KeyResultController(IKeyResultService keyResultService, IObjectiveService objectiveService, IMapper mapper)
         {
             _mapper = mapper;
             _keyResultService = keyResultService;
+            _objectiveService = objectiveService;
         }
 
         [HttpGet("")]
@@ -47,6 +52,11 @@ namespace API.Controllers
 
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
+
+            var x = _objectiveService.GetAllObjectives().Where(i => i.Id == saveKeyResultResource.SurObjectiveId).Include(i => i.SubObjectiveList).FirstOrDefault();
+            var isHaveSubObjectives = _objectiveService.GetAllObjectives().Where(i => i.Id == saveKeyResultResource.SurObjectiveId).Include(i => i.SubObjectiveList).FirstOrDefault().SubObjectiveList.Any();
+            if (isHaveSubObjectives)
+                return BadRequest(new Response { Status = "Error", Message = "Cannot added Key Result when exist Subobjectives." });
 
             var keyResultToCreate = _mapper.Map<SaveKeyResultDTO, KeyResult>(saveKeyResultResource);
             var newKeyResult = await _keyResultService.CreateKeyResult(keyResultToCreate);
