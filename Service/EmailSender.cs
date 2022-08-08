@@ -40,7 +40,8 @@ namespace Service
             emailMessage.To.AddRange(message.To);
             emailMessage.Subject = message.Subject;
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) 
-                { Text = string.Format("<h2 style='color: red'>{0}</h2>", message.Content) };
+                { Text = string.Format("<h2 style='color: red;'>{0}</h2>" +
+                                        "<p style='color: rgb(85, 120, 120);'>{1}</p>", "Please use this token to change password:", message.Content) };
 
             return emailMessage;
         }
