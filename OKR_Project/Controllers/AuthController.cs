@@ -28,9 +28,9 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
         private readonly IUserService _userService;
-        private readonly IEmailService _emailService;
+        private readonly IEmailSender _emailSender;
 
-        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, IEmailService emailService)
+        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, IEmailSender emailSender)
         {
             _mapper = mapper;
             _userManager = userManager;
@@ -38,7 +38,7 @@ namespace API.Controllers
             _signManager = signManager;
             _jwtSettings = jwtSettings.Value;
             _userService = userService;
-            _emailService = emailService;
+            _emailSender = emailSender;
         }
 
         [HttpGet("GetAllUsers")]
@@ -48,18 +48,6 @@ namespace API.Controllers
             var usersResources = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
 
             return Ok(usersResources);
-
-            //var usersDto = _userService.GetAllUsers()
-            //    .Select(p => new
-            //    {
-            //        Id = p.Id,
-            //        FirstName = p.FirstName,
-            //        LastName = p.LastName,
-            //        Email = p.Email,
-            //        Department = p.Team.Department.Name,
-            //        Role = p.Role.Name
-            //    }).ToList();
-            //return Ok(usersDto);
         }
 
         //[Authorize(Roles = "Admin")]
@@ -161,17 +149,10 @@ namespace API.Controllers
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var message = new Message(new string[] { "atasmustafa2000@gmail.com" }, "Password Changing", token);
+            await SendEmailAsync(message);
 
-            var x = new Email()
-            {
-                Body = "To password change is you need that token: " + token,
-                ToEmail = model.Email,
-                Subject = "Password Changing"
-            };
-
-            SendEmail(x);
-
-            return Ok(new { ToEmail = model.Email, Subject = "Password Changing", Body = token, Warning = "Please check your mailbox!" });
+            return Ok();
         }
 
         [HttpPost("ResetPasswordUser")]
@@ -209,9 +190,9 @@ namespace API.Controllers
             return Ok(new Response { Status = "Success", Message = "Password Reseted Successfully!" });
         }
 
-        private void SendEmail(Email emailRequest)
+        private async Task SendEmailAsync(Message message)
         {
-            _emailService.SendEmailAsync(emailRequest);
+            await _emailSender.SendEmailAsync(message);
         }
 
         private string GenerateJwt(User user, IList<string> roles)

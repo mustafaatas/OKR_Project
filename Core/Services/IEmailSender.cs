@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace Core.Services
 {
-    public interface IEmailService
+    public interface IEmailSender
     {
-        void SendEmailAsync(Email emailRequest);
+        void SendEmail(Message message);
+        Task SendEmailAsync(Message message);
     }
 }

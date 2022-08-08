@@ -2,6 +2,7 @@ using API.Extensions;
 using API.Settings;
 using Core;
 using Core.Auth;
+using Core.Models;
 using Core.Services;
 using Data;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +14,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
 
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
@@ -67,7 +69,8 @@ builder.Services.AddTransient<IObjectiveService, ObjectiveService>();
 builder.Services.AddTransient<ITeamService, TeamService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton(emailConfig);
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 builder.Services.AddIdentity<User, Role>(options =>
     {
@@ -79,24 +82,16 @@ builder.Services.AddIdentity<User, Role>(options =>
         options.Lockout.MaxFailedAccessAttempts = 5;
     }).AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
 
-//var emailConfig = builder.Configuration
-//        .GetSection("EmailConfiguration")
-//        .Get<EmailConfiguration>();
-//builder.Services.AddSingleton(emailConfig);
-
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-
 builder.Services.AddAuth(jwtSettings);
-
 builder.Services.AddAutoMapper(typeof(Program));
-
 builder.Services.AddControllers();
-
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -104,13 +99,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("corsapp");
-
 app.UseAuthorization();
-
 app.UseAuth();
-
 app.MapControllers();
-
 app.Run();
