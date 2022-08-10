@@ -1,6 +1,7 @@
 ﻿using Core;
 using Core.Models;
 using Core.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace Service
 
         public IQueryable<Team> GetAllTeams()
         {
-            return _unitOfWork.Teams.GetAllAsync();
+            return _unitOfWork.Teams.GetAllAsync().Include(t => t.UserList);
         }
 
         public async Task<Team> GetTeamById(int id)

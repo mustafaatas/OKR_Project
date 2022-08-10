@@ -12,6 +12,6 @@
 
         public Guid RoleId { get; set; }
 
-        public int TeamId { get; set; }
+        //public int TeamId { get; set; }
     }
 }

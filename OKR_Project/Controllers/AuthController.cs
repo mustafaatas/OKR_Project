@@ -1,4 +1,5 @@
 ﻿using API.DTO;
+using API.DTO.RoleDTO;
 using API.DTO.UserDTO;
 using API.Settings;
 using AutoMapper;
@@ -25,12 +26,13 @@ namespace API.Controllers
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signManager;
-        private readonly IMapper _mapper;
+        private readonly IMapper _mapper; 
         private readonly JwtSettings _jwtSettings;
         private readonly IUserService _userService;
+        private readonly IRoleService _roleService;
         private readonly IEmailSender _emailSender;
 
-        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, IEmailSender emailSender)
+        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, IEmailSender emailSender, IRoleService roleService)
         {
             _mapper = mapper;
             _userManager = userManager;
@@ -39,6 +41,16 @@ namespace API.Controllers
             _jwtSettings = jwtSettings.Value;
             _userService = userService;
             _emailSender = emailSender;
+            _roleService = roleService;
+        }
+
+        [HttpGet("GetAllRoles")]
+        public async Task<ActionResult<IEnumerable<RoleDTO>>> GetAllRoles()
+        {
+            var roles = _roleService.GetAllRoles();
+            var rolesResources = _mapper.Map<IEnumerable<Role>, IEnumerable<RoleDTO>>(roles);
+
+            return Ok(rolesResources);
         }
 
         [HttpGet("GetAllUsers")]
@@ -139,8 +151,8 @@ namespace API.Controllers
             return Problem(roleResult.Errors.First().Description, null, 500);
         }
 
-        [HttpPost("ResetPasswordToken")]
-        public async Task<IActionResult> ResetPasswordToken([FromBody] ResetPasswordTokenDTO model)
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordTokenDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -155,8 +167,8 @@ namespace API.Controllers
             return Ok();
         }
 
-        [HttpPost("ResetPasswordUser")]
-        public async Task<IActionResult> ResetPasswordUser([FromBody] ResetPasswordDTO model)
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
