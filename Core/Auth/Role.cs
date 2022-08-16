@@ -9,6 +9,8 @@ namespace Core.Auth
 {
     public class Role: IdentityRole<Guid>
     {
-        public List<User>? UserList { get; set; }
+        public List<User>? Users { get; set; }
+
+        //public List<Permission> Permissions { get; set; } = new List<Permission>();
     }
 }

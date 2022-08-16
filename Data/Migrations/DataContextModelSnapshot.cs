@@ -104,14 +104,11 @@ namespace Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RoleId")
+                    b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TeamId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -134,8 +131,6 @@ namespace Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("TeamId");
-
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -148,11 +143,12 @@ namespace Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artists", (string)null);
+                    b.ToTable("Artists");
                 });
 
             modelBuilder.Entity("Core.Models.Department", b =>
@@ -169,7 +165,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Core.Models.KeyResult", b =>
@@ -198,6 +194,7 @@ namespace Data.Migrations
                         .HasColumnType("real");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SurObjectiveId")
@@ -214,7 +211,7 @@ namespace Data.Migrations
 
                     b.HasIndex("SurObjectiveId");
 
-                    b.ToTable("KeyResults", (string)null);
+                    b.ToTable("KeyResults");
                 });
 
             modelBuilder.Entity("Core.Models.Music", b =>
@@ -225,18 +222,18 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("ArtistId")
-                        .IsRequired()
+                    b.Property<int>("ArtistId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("Musics", (string)null);
+                    b.ToTable("Musics");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>
@@ -250,11 +247,12 @@ namespace Data.Migrations
                     b.Property<DateTime?>("Deadline")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SurObjectiveId")
                         .HasColumnType("int");
@@ -263,17 +261,23 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("SurObjectiveId");
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Objectives", (string)null);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Objectives");
                 });
 
             modelBuilder.Entity("Core.Models.Team", b =>
@@ -284,18 +288,36 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.ToTable("Teams");
+                });
 
-                    b.ToTable("Teams", (string)null);
+            modelBuilder.Entity("Core.Models.TeamUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TeamUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -403,28 +425,25 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
-                    b.HasOne("Core.Models.Department", null)
-                        .WithMany("UserList")
+                    b.HasOne("Core.Models.Department", "Department")
+                        .WithMany("Users")
                         .HasForeignKey("DepartmentId");
 
                     b.HasOne("Core.Auth.Role", "Role")
-                        .WithMany("UserList")
-                        .HasForeignKey("RoleId");
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.HasOne("Core.Models.Team", "Team")
-                        .WithMany("UserList")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.Navigation("Department");
 
                     b.Navigation("Role");
-
-                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Core.Models.KeyResult", b =>
                 {
                     b.HasOne("Core.Models.Objective", "SurObjective")
-                        .WithMany("KeyResultList")
+                        .WithMany("KeyResults")
                         .HasForeignKey("SurObjectiveId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -445,35 +464,48 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Models.Objective", b =>
                 {
-                    b.HasOne("Core.Auth.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
+                    b.HasOne("Core.Models.Department", "Department")
+                        .WithMany("Objectives")
+                        .HasForeignKey("DepartmentId");
 
                     b.HasOne("Core.Models.Objective", "SurObjective")
-                        .WithMany("SubObjectiveList")
-                        .HasForeignKey("SurObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany("SubObjectives")
+                        .HasForeignKey("SurObjectiveId");
 
                     b.HasOne("Core.Models.Team", "Team")
-                        .WithMany()
+                        .WithMany("Objectives")
                         .HasForeignKey("TeamId");
 
-                    b.Navigation("Owner");
+                    b.HasOne("Core.Auth.User", "User")
+                        .WithMany("Objectives")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Department");
 
                     b.Navigation("SurObjective");
 
                     b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Core.Models.Team", b =>
+            modelBuilder.Entity("Core.Models.TeamUser", b =>
                 {
-                    b.HasOne("Core.Models.Department", "Department")
-                        .WithMany("TeamList")
-                        .HasForeignKey("DepartmentId")
+                    b.HasOne("Core.Models.Team", "Team")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Department");
+                    b.HasOne("Core.Auth.User", "User")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -529,7 +561,14 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.Role", b =>
                 {
-                    b.Navigation("UserList");
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Core.Auth.User", b =>
+                {
+                    b.Navigation("Objectives");
+
+                    b.Navigation("TeamUsers");
                 });
 
             modelBuilder.Entity("Core.Models.Artist", b =>
@@ -539,21 +578,23 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Models.Department", b =>
                 {
-                    b.Navigation("TeamList");
+                    b.Navigation("Objectives");
 
-                    b.Navigation("UserList");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>
                 {
-                    b.Navigation("KeyResultList");
+                    b.Navigation("KeyResults");
 
-                    b.Navigation("SubObjectiveList");
+                    b.Navigation("SubObjectives");
                 });
 
             modelBuilder.Entity("Core.Models.Team", b =>
                 {
-                    b.Navigation("UserList");
+                    b.Navigation("Objectives");
+
+                    b.Navigation("TeamUsers");
                 });
 #pragma warning restore 612, 618
         }

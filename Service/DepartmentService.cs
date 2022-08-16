@@ -1,6 +1,7 @@
 ﻿using Core;
 using Core.Models;
 using Core.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,19 +22,19 @@ namespace Service
         public async Task<Department> CreateDepartment(Department newDepartment)
         {
             await _unitOfWork.Departments.AddAsync(newDepartment);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
             return newDepartment;
         }
 
         public async Task DeleteDepartment(Department department)
         {
             _unitOfWork.Departments.Remove(department);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public IQueryable<Department> GetAllDepartments()
         {
-            return _unitOfWork.Departments.GetAllAsync();
+            return _unitOfWork.Departments.GetAllAsync().Include(d => d.Users);
         }
 
         public async Task<Department> GetDepartmentById(int id)
@@ -50,7 +51,7 @@ namespace Service
             //};
 
             departmentToBeUpdated.Name = department.Name;
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
     }
 }

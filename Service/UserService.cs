@@ -24,19 +24,19 @@ namespace Service
         public async Task<User> CreateUser(User newUser)
         {
             await _unitOfWork.Users.AddAsync(newUser);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
             return newUser;
         }
 
         public async Task DeleteUser(User user)
         {
             _unitOfWork.Users.Remove(user);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public IQueryable<User> GetAllUsers()
         {
-            return _unitOfWork.Users.GetAllAsync().Include(i => i.Role).Include(i => i.Team).ThenInclude(i => i.Department);
+            return _unitOfWork.Users.GetAllAsync().Include(i => i.Role).Include(i => i.Department).Include(i => i.TeamUsers).ThenInclude(i => i.Team);
         }
 
         public async Task<User> GetUserById(int id)
@@ -46,16 +46,15 @@ namespace Service
 
         public async Task UpdateUser(User userToBeUpdated, User user)
         {
-            var x = GetAllUsers().Where(p => p.Id == userToBeUpdated.Id).FirstOrDefault();
-            x.Role.Name = user.Role.Name;
-            await _unitOfWork.CommitAsync();
+            userToBeUpdated.RoleId = user.RoleId;
+            _unitOfWork.Commit();
         }
 
         public string GetDepartmentOfUser(Guid userId)
         {
             var user = GetAllUsers().Where(p => p.Id == userId).FirstOrDefault();
 
-            return user?.Team?.Department.Name;
+            return user.Department.Name;
         }
     }
 }

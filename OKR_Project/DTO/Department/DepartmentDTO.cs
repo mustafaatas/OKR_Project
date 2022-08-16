@@ -9,8 +9,6 @@ namespace API.DTO.Department
 
         public string Name { get; set; }
 
-        public List<Core.Models.Team>? TeamList { get; set; }
-
-        public List<User>? UserList { get; set; }
+        public List<User>? Users { get; set; }
     }
 }

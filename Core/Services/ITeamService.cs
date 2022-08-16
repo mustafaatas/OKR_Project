@@ -12,7 +12,7 @@ namespace Core.Services
         IQueryable<Team> GetAllTeams();
         Task<Team> GetTeamById(int id);
         Task<Team> CreateTeam(Team newTeam);
-        Task UpdateTeam(Team teamToBeUpdated, Team team);
+        void UpdateTeam(Team teamToBeUpdated);
         Task DeleteTeam(Team team);
     }
 }

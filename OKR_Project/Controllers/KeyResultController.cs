@@ -53,7 +53,7 @@ namespace API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
-            var isHaveSubObjectives = _objectiveService.GetAllObjectives().Where(i => i.Id == saveKeyResultResource.SurObjectiveId).Include(i => i.SubObjectiveList).FirstOrDefault().SubObjectiveList.Any();
+            var isHaveSubObjectives = _objectiveService.GetAllObjectives().Where(i => i.Id == saveKeyResultResource.SurObjectiveId).Include(i => i.SubObjectives).FirstOrDefault().SubObjectives.Any();
             if (isHaveSubObjectives)
                 return BadRequest(new Response { Status = "Error", Message = "Cannot added Key Result when exist Subobjectives." });
 

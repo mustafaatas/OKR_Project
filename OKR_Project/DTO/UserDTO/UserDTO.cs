@@ -10,12 +10,10 @@ namespace API.DTO.UserDTO
 
         public string LastName { get; set; }
 
-        public string? TeamName { get; set; }
+        public List<string>? TeamNames { get; set; }
 
         public string? DepartmentName { get; set; }
 
         public string? RoleName { get; set; }
-
-        //public Role? Role { get; set; }
     }
 }

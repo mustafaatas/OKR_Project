@@ -17,6 +17,6 @@ namespace Core
         ITeamRepository Teams { get; }
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
-        Task<int> CommitAsync();
+        int Commit();
     }
 }

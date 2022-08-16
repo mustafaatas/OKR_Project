@@ -62,7 +62,7 @@ namespace API.Controllers
             return Ok(usersResources);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("AddUser")]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
@@ -91,6 +91,7 @@ namespace API.Controllers
             return Ok(updatedUserResource);
         }
 
+        [AllowAnonymous]
         [HttpPost("Signin")]
         public async Task<IActionResult> SignIn(UserLoginDTO userLoginDto)
         {
@@ -112,13 +113,13 @@ namespace API.Controllers
                     Name = user.FirstName,
                     Surname = user.LastName,
                     UserRole = user.Role.Name,
-                    UserTeamName = user?.Team?.Name,
-                    UserDepartmentName = user?.Team?.Department?.Name
+                    UserTeamsName = string.Join(";", user?.TeamUsers.Select(p => p.Team.Name).ToList()), 
+                    UserDepartmentName = user?.Department.Name
                     //UserDepartmentName = _userService.GetDepartmentOfUser(user.Id) --> Dogru ve calisiyor
                 });
             }
 
-            return BadRequest(new Response { Status = "Success", Message = "Email or password incorrect." });
+            return BadRequest(new Response { Status = "Error", Message = "Email or password incorrect." });
         }
 
         [HttpPost("Logout")]
@@ -151,6 +152,7 @@ namespace API.Controllers
             return Problem(roleResult.Errors.First().Description, null, 500);
         }
 
+        [AllowAnonymous]
         [HttpPost("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordTokenDTO model)
         {
@@ -161,12 +163,13 @@ namespace API.Controllers
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var message = new Message(new string[] { "atasmustafa2000@gmail.com" }, "Password Changing", token);
+            var message = new Message(new string[] { model.Email }, "Password Changing", token);
             await SendEmailAsync(message);
 
             return Ok();
         }
-
+        
+        [AllowAnonymous]
         [HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {

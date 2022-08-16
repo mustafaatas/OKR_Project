@@ -21,14 +21,14 @@ namespace Service
         public async Task<KeyResult> CreateKeyResult(KeyResult newKeyResult)
         {
             await _unitOfWork.KeyResults.AddAsync(newKeyResult);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
             return newKeyResult;          
         }
 
         public async Task DeleteKeyResult(KeyResult keyResult)
         {
             _unitOfWork.KeyResults.Remove(keyResult);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public IQueryable<KeyResult> GetAllKeyResults()
@@ -45,7 +45,7 @@ namespace Service
         {
             keyResultToBeUpdated.ActualValue = keyResult.ActualValue;
             keyResultToBeUpdated.Status = keyResult.Status;
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
     }
 }

@@ -19,15 +19,15 @@ namespace Service
 
         public async Task<Artist> CreateArtist(Artist newArtist)
         {
-            await _unitOfWork.Artists.AddAsync(newArtist);
-            await _unitOfWork.CommitAsync();
+             _unitOfWork.Artists.AddAsync(newArtist);
+            _unitOfWork.Commit();
             return newArtist;
         }
 
         public async Task DeleteArtist(Artist artist)
         {
             _unitOfWork.Artists.Remove(artist);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public IQueryable<Artist> GetAllArtists()
@@ -43,7 +43,7 @@ namespace Service
         public async Task UpdateArtist(Artist artistToBeUpdated, Artist artist)
         {
             artistToBeUpdated.Name = artist.Name;
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Service
         public async Task<Objective> CreateObjective(Objective newObjective)
         {
             await _unitOfWork.Objectives.AddAsync(newObjective);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
             return newObjective;
         }
 
@@ -38,7 +38,7 @@ namespace Service
             objectiveToDelete.Add(objective);
 
             _unitOfWork.Objectives.RemoveRange(objectiveToDelete);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public async Task<List<Objective>> DeleteSubObjectives(int objectiveId)
@@ -57,7 +57,7 @@ namespace Service
 
         public IQueryable<Objective> GetAllObjectives()
         {
-            return _unitOfWork.Objectives.GetAllAsync();
+            return _unitOfWork.Objectives.GetAllAsync().Include(i => i.User).Include(i => i.KeyResults).Include(i => i.User);
         }
 
         public async Task<Objective> GetObjectiveById(int id)
@@ -69,10 +69,10 @@ namespace Service
         {
             objectiveToBeUpdated.Title = objective.Title;
             objectiveToBeUpdated.Description = objective.Description;
-            objectiveToBeUpdated.OwnerId = objective.OwnerId;
+            objectiveToBeUpdated.UserId = objective.UserId;
             objectiveToBeUpdated.TeamId = objective.TeamId;
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
     }
 }

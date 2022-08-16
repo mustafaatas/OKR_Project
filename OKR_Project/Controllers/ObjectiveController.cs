@@ -50,6 +50,18 @@ namespace API.Controllers
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
             var objectiveToCreate = _mapper.Map<SaveObjectiveDTO, Objective>(saveObjectiveResource);
+            var user = await _objectiveService.GetAllObjectives().Where(x => x.UserId == saveObjectiveResource.UserId).Select(k => k.User).FirstOrDefaultAsync();
+            var isSelectedTeam = _objectiveService.GetAllObjectives().Any(x => x.TeamId == objectiveToCreate.TeamId);
+
+            if (!isSelectedTeam && objectiveToCreate.TeamId != null)
+            {
+                objectiveToCreate.DepartmentId = null;
+            }
+            else
+            {
+                objectiveToCreate.DepartmentId = user.DepartmentId;
+            }
+
             var newObjective = await _objectiveService.CreateObjective(objectiveToCreate);
             var objective = await _objectiveService.GetObjectiveById(newObjective.Id);
             var objectiveResource = _mapper.Map<Objective, ObjectiveDTO>(objective);
@@ -65,7 +77,7 @@ namespace API.Controllers
             if (!validationResult.IsValid)
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
-            var isHaveKeyResults = _objectiveService.GetAllObjectives().Where(i => i.Id == saveSubObjectiveResource.SurObjectiveId).Include(i => i.KeyResultList).FirstOrDefault().KeyResultList.Any();
+            var isHaveKeyResults = _objectiveService.GetAllObjectives().Where(i => i.Id == saveSubObjectiveResource.SurObjectiveId).Include(i => i.KeyResults).FirstOrDefault().KeyResults.Any();
             if (isHaveKeyResults)
                 return BadRequest(new Response { Status = "Error", Message = "Cannot added Subobjective when exist Key Results." });
 

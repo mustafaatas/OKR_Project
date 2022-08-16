@@ -20,14 +20,14 @@ namespace Service
         public async Task<Music> CreateMusic(Music newMusic)
         {
             await _unitOfWork.Musics.AddAsync(newMusic);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
             return newMusic;
         }
 
         public async Task DeleteMusic(Music music)
         {
             _unitOfWork.Musics.Remove(music);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public async Task<IEnumerable<Music>> GetAllWithArtist()
@@ -50,7 +50,7 @@ namespace Service
             musicToBeUpdated.Name = music.Name;
             musicToBeUpdated.ArtistId = music.ArtistId;
 
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
     }
 }

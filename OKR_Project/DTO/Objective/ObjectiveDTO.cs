@@ -1,4 +1,5 @@
 ﻿using Core.Auth;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.DTO.Objective
 {
@@ -10,15 +11,11 @@ namespace API.DTO.Objective
 
         public string? Description { get; set; }
 
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime? Deadline { get; set; }
 
-        public User? Owner { get; set; }
-
-        //public Core.Models.Department? Department { get; set; }
-
-        //public Core.Models.Team? Team { get; set; }
-
-        //public Core.Models.Objective? SurObjective { get; set; }
+        public User? User { get; set; }
 
         public int DepartmentId { get; set; }
 
@@ -26,8 +23,8 @@ namespace API.DTO.Objective
 
         public int SurObjectiveId { get; set; }
 
-        public List<Core.Models.Objective>? SubObjectiveList { get; set; }
+        public List<Core.Models.Objective> SubObjectives { get; set; } = new List<Core.Models.Objective>();
 
-        public List<Core.Models.KeyResult>? KeyResultList { get; set; }
+        public List<Core.Models.KeyResult> KeyResults { get; set; } = new List<Core.Models.KeyResult>();
     }
 }

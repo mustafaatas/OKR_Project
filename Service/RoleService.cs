@@ -21,14 +21,14 @@ namespace Service
         public async Task<Role> CreateRole(Role newRole)
         {
             await _unitOfWork.Roles.AddAsync(newRole);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
             return newRole;
         }
 
         public async Task DeleteRole(Role role)
         {
             _unitOfWork.Roles.Remove(role);
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
 
         public IQueryable<Role> GetAllRoles()
@@ -44,7 +44,7 @@ namespace Service
         public async Task UpdateRole(Role roleToBeUpdated, Role role)
         {
             roleToBeUpdated.Name = role.Name;
-            await _unitOfWork.CommitAsync();
+            _unitOfWork.Commit();
         }
     }
 }

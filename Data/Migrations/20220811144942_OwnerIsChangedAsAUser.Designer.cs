@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220728083116_fixedDepartmentTable")]
-    partial class fixedDepartmentTable
+    [Migration("20220811144942_OwnerIsChangedAsAUser")]
+    partial class OwnerIsChangedAsAUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -65,7 +65,7 @@ namespace Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DepartmentId")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -112,9 +112,6 @@ namespace Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TeamId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -136,8 +133,6 @@ namespace Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("TeamId");
-
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -150,6 +145,7 @@ namespace Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -200,6 +196,7 @@ namespace Data.Migrations
                         .HasColumnType("real");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SurObjectiveId")
@@ -227,11 +224,11 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("ArtistId")
-                        .IsRequired()
+                    b.Property<int>("ArtistId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -249,11 +246,15 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SurObjectiveId")
                         .HasColumnType("int");
@@ -262,15 +263,21 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("SurObjectiveId");
 
                     b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Objectives");
                 });
@@ -283,18 +290,36 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
-
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("Core.Models.TeamUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TeamUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -403,29 +428,24 @@ namespace Data.Migrations
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
                     b.HasOne("Core.Models.Department", "Department")
-                        .WithMany("UserList")
+                        .WithMany("Users")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Auth.Role", "Role")
                         .WithMany("UserList")
                         .HasForeignKey("RoleId");
 
-                    b.HasOne("Core.Models.Team", "Team")
-                        .WithMany("UserList")
-                        .HasForeignKey("TeamId");
-
                     b.Navigation("Department");
 
                     b.Navigation("Role");
-
-                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Core.Models.KeyResult", b =>
                 {
                     b.HasOne("Core.Models.Objective", "SurObjective")
-                        .WithMany("KeyResultList")
+                        .WithMany("KeyResults")
                         .HasForeignKey("SurObjectiveId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -446,35 +466,50 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Models.Objective", b =>
                 {
-                    b.HasOne("Core.Auth.User", "Owner")
+                    b.HasOne("Core.Models.Department", "Department")
                         .WithMany()
-                        .HasForeignKey("OwnerId");
+                        .HasForeignKey("DepartmentId");
 
                     b.HasOne("Core.Models.Objective", "SurObjective")
-                        .WithMany("SubObjectiveList")
-                        .HasForeignKey("SurObjectiveId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .WithMany("SubObjectives")
+                        .HasForeignKey("SurObjectiveId");
 
                     b.HasOne("Core.Models.Team", "Team")
                         .WithMany()
                         .HasForeignKey("TeamId");
 
-                    b.Navigation("Owner");
-
-                    b.Navigation("SurObjective");
-
-                    b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("Core.Models.Team", b =>
-                {
-                    b.HasOne("Core.Models.Department", "Department")
-                        .WithMany("TeamList")
-                        .HasForeignKey("DepartmentId")
+                    b.HasOne("Core.Auth.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Department");
+
+                    b.Navigation("SurObjective");
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Models.TeamUser", b =>
+                {
+                    b.HasOne("Core.Models.Team", "Team")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Auth.User", "User")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -533,6 +568,11 @@ namespace Data.Migrations
                     b.Navigation("UserList");
                 });
 
+            modelBuilder.Entity("Core.Auth.User", b =>
+                {
+                    b.Navigation("TeamUsers");
+                });
+
             modelBuilder.Entity("Core.Models.Artist", b =>
                 {
                     b.Navigation("Musics");
@@ -540,21 +580,19 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Models.Department", b =>
                 {
-                    b.Navigation("TeamList");
-
-                    b.Navigation("UserList");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>
                 {
-                    b.Navigation("KeyResultList");
+                    b.Navigation("KeyResults");
 
-                    b.Navigation("SubObjectiveList");
+                    b.Navigation("SubObjectives");
                 });
 
             modelBuilder.Entity("Core.Models.Team", b =>
                 {
-                    b.Navigation("UserList");
+                    b.Navigation("TeamUsers");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,8 +6,6 @@ namespace API.DTO.Team
     {
         public string? Name { get; set; }
 
-        public int? DepartmentId { get; set; }
-
-        public List<Guid>? UserIdList { get; set; }
+        public List<Guid> UserIds { get; set; } = new List<Guid>();
     }
 }

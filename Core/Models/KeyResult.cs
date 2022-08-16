@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
     public class KeyResult
     {
-        [Key]
         public int Id { get; set; }
 
         public string Title { get; set; }
@@ -25,7 +25,7 @@ namespace Core.Models
 
         public float ActualValue { get; set; }
 
-        public string? Status { get; set; } = "Open";
+        public string Status { get; set; } = "Open";
 
         public int SurObjectiveId { get; set; }
 

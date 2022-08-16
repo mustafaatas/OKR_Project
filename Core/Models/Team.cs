@@ -1,24 +1,47 @@
-﻿using Core.Auth;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Core.Models
+﻿namespace Core.Models
 {
     public class Team
     {
-        [Key]
         public int Id { get; set; }
 
         public string Name { get; set; }
 
-        public int DepartmentId { get; set; }
+        public List<Objective> Objectives { get; set; } = new List<Objective>();
 
-        public Department? Department { get; set; }
+        public List<TeamUser> TeamUsers { get; set; } = new List<TeamUser>();
 
-        public List<User>? UserList { get; set; } = new List<User>();
-    }
+
+        public void SetTeamUsers(List<Guid> userIds)
+        {
+            var existingUsers = TeamUsers.Select(p => p.UserId).ToList();
+
+            var userIdsToBeDeleted = existingUsers.Except(userIds).ToList();
+            var userIdsToBeAdded = userIds.Except(existingUsers).ToList();
+
+            foreach(var userIdToBeDeleted in userIdsToBeDeleted)
+            {
+                DeleteUserFromTeam(userIdToBeDeleted);
+            }
+
+            foreach (var userIdToBeAdded in userIdsToBeAdded)
+            {
+                AddUserToTeam(userIdToBeAdded);
+            }
+        }
+
+        public void AddUserToTeam(Guid userId)
+        {
+            var teamUser = new TeamUser { 
+                UserId = userId
+            };
+
+            TeamUsers.Add(teamUser);
+        }
+
+        public void DeleteUserFromTeam(Guid userId)
+        {
+            var userToBeDeleted = TeamUsers.FirstOrDefault(p => p.UserId == userId);
+            TeamUsers.Remove(userToBeDeleted);
+        }
+    }  
 }

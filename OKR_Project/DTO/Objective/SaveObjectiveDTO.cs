@@ -8,16 +8,10 @@ namespace API.DTO.Objective
 
         public string Description { get; set; }
 
-        public Guid OwnerId { get; set; }
+        public virtual Guid UserId { get; set; }
 
-        public int TeamId { get; set; }
+        public int? TeamId { get; set; }
 
-        //public int DepartmentId { get; set; }
-
-        //public Core.Models.Objective? SurObjective { get; set; }
-
-        //public List<Core.Models.Objective>? SubObjectiveList { get; set; }
-
-        //public List<Core.Models.KeyResult>? KeyResultList { get; set; }
+        //public int? DepartmentId { get; set; }
     }
 }
