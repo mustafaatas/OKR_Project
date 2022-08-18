@@ -28,6 +28,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TeamDTO>>> GetAllTeams()
         {
+            //HttpContext.User.Claims
             var teams = _teamService.GetAllTeams().ToList();
             var teamResources = _mapper.Map<IEnumerable<Team>, IEnumerable<TeamDTO>>(teams);
 

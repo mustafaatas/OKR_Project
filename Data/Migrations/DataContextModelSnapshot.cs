@@ -119,8 +119,6 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -159,11 +157,18 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<Guid?>("LeaderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LeaderId")
+                        .IsUnique()
+                        .HasFilter("[LeaderId] IS NOT NULL");
 
                     b.ToTable("Departments");
                 });
@@ -425,19 +430,22 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
-                    b.HasOne("Core.Models.Department", "Department")
-                        .WithMany("Users")
-                        .HasForeignKey("DepartmentId");
-
                     b.HasOne("Core.Auth.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Department");
-
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Core.Models.Department", b =>
+                {
+                    b.HasOne("Core.Auth.User", "Leader")
+                        .WithOne("Department")
+                        .HasForeignKey("Core.Models.Department", "LeaderId");
+
+                    b.Navigation("Leader");
                 });
 
             modelBuilder.Entity("Core.Models.KeyResult", b =>
@@ -566,6 +574,8 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
+                    b.Navigation("Department");
+
                     b.Navigation("Objectives");
 
                     b.Navigation("TeamUsers");
@@ -579,8 +589,6 @@ namespace Data.Migrations
             modelBuilder.Entity("Core.Models.Department", b =>
                 {
                     b.Navigation("Objectives");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>

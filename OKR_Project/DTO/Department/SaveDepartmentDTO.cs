@@ -5,6 +5,8 @@ namespace API.DTO.Department
 {
     public class SaveDepartmentDTO
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
+
+        public Guid? LeaderId { get; set; }
     }
 }

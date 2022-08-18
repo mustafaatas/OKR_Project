@@ -62,7 +62,7 @@ namespace API.Controllers
             return Ok(usersResources);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("AddUser")]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {

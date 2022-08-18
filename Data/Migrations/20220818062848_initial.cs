@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Data.Migrations
 {
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -34,19 +34,6 @@ namespace Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Departments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Departments", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -110,8 +97,8 @@ namespace Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -135,12 +122,6 @@ namespace Data.Migrations
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalTable: "Departments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -229,42 +210,21 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Objectives",
+                name: "Departments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Deadline = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TeamId = table.Column<int>(type: "int", nullable: true),
-                    DepartmentId = table.Column<int>(type: "int", nullable: true),
-                    SurObjectiveId = table.Column<int>(type: "int", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LeaderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Objectives", x => x.Id);
+                    table.PrimaryKey("PK_Departments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Objectives_AspNetUsers_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Departments_AspNetUsers_LeaderId",
+                        column: x => x.LeaderId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Objectives_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalTable: "Departments",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Objectives_Objectives_SurObjectiveId",
-                        column: x => x.SurObjectiveId,
-                        principalTable: "Objectives",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Objectives_Teams_TeamId",
-                        column: x => x.TeamId,
-                        principalTable: "Teams",
                         principalColumn: "Id");
                 });
 
@@ -292,6 +252,45 @@ namespace Data.Migrations
                         principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Objectives",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Deadline = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TeamId = table.Column<int>(type: "int", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
+                    SurObjectiveId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Objectives", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Objectives_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Objectives_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Objectives_Objectives_SurObjectiveId",
+                        column: x => x.SurObjectiveId,
+                        principalTable: "Objectives",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Objectives_Teams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -354,11 +353,6 @@ namespace Data.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_DepartmentId",
-                table: "AspNetUsers",
-                column: "DepartmentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUsers_RoleId",
                 table: "AspNetUsers",
                 column: "RoleId");
@@ -369,6 +363,13 @@ namespace Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_LeaderId",
+                table: "Departments",
+                column: "LeaderId",
+                unique: true,
+                filter: "[LeaderId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_KeyResults_SurObjectiveId",
@@ -386,11 +387,6 @@ namespace Data.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Objectives_OwnerId",
-                table: "Objectives",
-                column: "OwnerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Objectives_SurObjectiveId",
                 table: "Objectives",
                 column: "SurObjectiveId");
@@ -399,6 +395,11 @@ namespace Data.Migrations
                 name: "IX_Objectives_TeamId",
                 table: "Objectives",
                 column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Objectives_UserId",
+                table: "Objectives",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TeamUsers_TeamId",
@@ -444,16 +445,16 @@ namespace Data.Migrations
                 name: "Artists");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Departments");
 
             migrationBuilder.DropTable(
                 name: "Teams");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Departments");
+                name: "AspNetRoles");
         }
     }
 }

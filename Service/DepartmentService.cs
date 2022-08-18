@@ -34,7 +34,7 @@ namespace Service
 
         public IQueryable<Department> GetAllDepartments()
         {
-            return _unitOfWork.Departments.GetAllAsync().Include(d => d.Users);
+            return _unitOfWork.Departments.GetAllAsync().Include(i => i.Leader).ThenInclude(i => i.Role);
         }
 
         public async Task<Department> GetDepartmentById(int id)
@@ -44,13 +44,8 @@ namespace Service
 
         public async Task UpdateDepartment(Department departmentToBeUpdated, Department department)
         {
-
-            //departmentToBeUpdated = new Department()
-            //{
-            //    Name = department.Name,
-            //};
-
             departmentToBeUpdated.Name = department.Name;
+            departmentToBeUpdated.LeaderId = department.LeaderId;
             _unitOfWork.Commit();
         }
     }

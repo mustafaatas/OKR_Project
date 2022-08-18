@@ -90,14 +90,28 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddControllers();
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddMvc(config =>
-{
-    var policy = new AuthorizationPolicyBuilder()
-    .RequireAuthenticatedUser()
-    .Build();
+builder.Services.AddHttpContextAccessor();
 
-    config.Filters.Add(new AuthorizeFilter(policy));
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnSignedIn = (context) =>
+    {
+        context.HttpContext.User = context.Principal;
+        return Task.CompletedTask;
+    };
 });
+
+
+// Proje bazýnda authorization
+
+//builder.Services.AddMvc(config =>
+//{
+//    var policy = new AuthorizationPolicyBuilder()
+//    .RequireAuthenticatedUser()
+//    .Build();
+
+//    config.Filters.Add(new AuthorizeFilter(policy));
+//});   
 
 
 var app = builder.Build();
@@ -111,7 +125,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("corsapp");
-app.UseAuthorization();
 app.UseAuth();
 app.MapControllers();
 app.Run();

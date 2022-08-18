@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220812071947_nullableFieldIsAddedToObjective")]
-    partial class nullableFieldIsAddedToObjective
+    [Migration("20220818102400_NameFieldIsSetAsANonNullableInDepartment")]
+    partial class NameFieldIsSetAsANonNullableInDepartment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -65,7 +65,7 @@ namespace Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DepartmentId")
+                    b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -106,7 +106,7 @@ namespace Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RoleId")
+                    b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SecurityStamp")
@@ -120,8 +120,6 @@ namespace Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -161,11 +159,18 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<Guid?>("LeaderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LeaderId")
+                        .IsUnique()
+                        .HasFilter("[LeaderId] IS NOT NULL");
 
                     b.ToTable("Departments");
                 });
@@ -427,19 +432,22 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
-                    b.HasOne("Core.Models.Department", "Department")
+                    b.HasOne("Core.Auth.Role", "Role")
                         .WithMany("Users")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Auth.Role", "Role")
-                        .WithMany("UserList")
-                        .HasForeignKey("RoleId");
-
-                    b.Navigation("Department");
-
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Core.Models.Department", b =>
+                {
+                    b.HasOne("Core.Auth.User", "Leader")
+                        .WithOne("Department")
+                        .HasForeignKey("Core.Models.Department", "LeaderId");
+
+                    b.Navigation("Leader");
                 });
 
             modelBuilder.Entity("Core.Models.KeyResult", b =>
@@ -467,7 +475,7 @@ namespace Data.Migrations
             modelBuilder.Entity("Core.Models.Objective", b =>
                 {
                     b.HasOne("Core.Models.Department", "Department")
-                        .WithMany()
+                        .WithMany("Objectives")
                         .HasForeignKey("DepartmentId");
 
                     b.HasOne("Core.Models.Objective", "SurObjective")
@@ -475,7 +483,7 @@ namespace Data.Migrations
                         .HasForeignKey("SurObjectiveId");
 
                     b.HasOne("Core.Models.Team", "Team")
-                        .WithMany()
+                        .WithMany("Objectives")
                         .HasForeignKey("TeamId");
 
                     b.HasOne("Core.Auth.User", "User")
@@ -563,11 +571,13 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.Role", b =>
                 {
-                    b.Navigation("UserList");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
+                    b.Navigation("Department");
+
                     b.Navigation("Objectives");
 
                     b.Navigation("TeamUsers");
@@ -580,7 +590,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Models.Department", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("Objectives");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>
@@ -592,6 +602,8 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Models.Team", b =>
                 {
+                    b.Navigation("Objectives");
+
                     b.Navigation("TeamUsers");
                 });
 #pragma warning restore 612, 618

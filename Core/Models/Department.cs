@@ -1,4 +1,5 @@
 ﻿using Core.Auth;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
@@ -8,8 +9,12 @@ namespace Core.Models
 
         public string Name { get; set; }
 
-        public List<User> Users{ get; set; } = new List<User>();
+        public List<Objective> Objectives { get; set; } = new List<Objective>();
 
-        public List<Objective> Objectives{ get; set; } = new List<Objective>();
+        public Guid? LeaderId { get; set; }
+
+        [ForeignKey("LeaderId")]
+
+        public User? Leader { get; set; }
     }
 }

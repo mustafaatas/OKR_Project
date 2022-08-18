@@ -7,9 +7,7 @@ namespace API.Validators
     {
         public SaveDepartmentResourceValidator()
         {
-            RuleFor(a => a.Name)
-              .NotEmpty()
-              .MaximumLength(50);
+
         }
     }
 }
