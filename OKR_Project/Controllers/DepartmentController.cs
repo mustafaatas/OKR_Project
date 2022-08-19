@@ -62,7 +62,7 @@ namespace API.Controllers
 
             var dep = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
 
-            if(user?.DepartmentId != 0)
+            if(user != null)
             {
                 return BadRequest(new Response { Status = "Error", Message = "The user is participant of another department." });
             }
