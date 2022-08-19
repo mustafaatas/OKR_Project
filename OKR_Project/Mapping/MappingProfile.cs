@@ -67,7 +67,7 @@ namespace API.Mapping
                 LastName = source.LastName,
                 RoleName = source?.Role?.Name,
                 TeamNames = source?.TeamUsers.Select(p => p.Team.Name).ToList(),
-                DepartmentName = source?.Department?.Name,
+                DepartmentName = source?.Department?.Name
             };
         }
     }

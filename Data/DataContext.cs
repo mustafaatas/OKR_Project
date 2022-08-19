@@ -47,6 +47,21 @@ namespace Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             //builder
+            //    .Entity<Department>()
+            //    .HasOne<User>(d => d.Leader)
+            //    .WithOne(u => u.Department)
+            //    .HasForeignKey<Department>(d => d.LeaderId)
+            //    .OnDelete(DeleteBehavior.SetNull);
+
+
+            //builder
+            //    .Entity<User>()
+            //    .HasOne(u => u.Department)
+            //    .WithOne(d => d.Leader)
+            //    .HasForeignKey<Department>(d => d.LeaderId);
+
+
+            //builder
             //    .Entity<User>()
             //    .HasOne<Department>(d => d.Department)
             //    .WithMany(u => u.Users)

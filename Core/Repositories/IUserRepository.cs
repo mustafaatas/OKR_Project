@@ -9,7 +9,7 @@ namespace Core.Repositories
 {
     public interface IUserRepository: IRepository<User>
     {
-        Task<IEnumerable<User>> GetAllWithUsersAsync();
+        IQueryable<User> GetUsersWithInclude();
         Task<User> GetWithUsersByIdAsync(int id);
     }
 }

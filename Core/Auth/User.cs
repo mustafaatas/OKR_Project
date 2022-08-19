@@ -1,5 +1,6 @@
 ﻿using Core.Models;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Auth
 {
@@ -13,9 +14,10 @@ namespace Core.Auth
 
         public Role Role { get; set; }
 
-        public int? DepartmentId { get; set; }
+        public int DepartmentId { get; set; }
 
-        public Department? Department { get; set; }
+        [ForeignKey("DepartmentId")]
+        public Department Department { get; set; }
 
         public List<TeamUser> TeamUsers { get; set; } = new List<TeamUser>();
 

@@ -113,8 +113,8 @@ namespace API.Controllers
                     Name = user.FirstName,
                     Surname = user.LastName,
                     UserRole = user.Role.Name,
-                    UserTeamsName = string.Join(";", user?.TeamUsers.Select(p => p.Team.Name).ToList()), 
-                    UserDepartmentName = user?.Department.Name
+                    UserTeamsName = string.Join(";", user.TeamUsers.Select(p => p.Team.Name).ToList()), 
+                    UserDepartmentName = user?.Department?.Name
                     //UserDepartmentName = _userService.GetDepartmentOfUser(user.Id) --> Dogru ve calisiyor
                 });
             }

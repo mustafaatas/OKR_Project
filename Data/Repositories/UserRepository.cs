@@ -13,9 +13,9 @@ namespace Data.Repositories
     {
         public UserRepository(DbContext context) : base(context) { }
 
-        public Task<IEnumerable<User>> GetAllWithUsersAsync()
+        public IQueryable<User> GetUsersWithInclude()
         {
-            throw new NotImplementedException();
+            return DataContext.Users.Include(i => i.Role).Include(i => i.Department).Include(i => i.TeamUsers).ThenInclude(i => i.Team).AsQueryable(); ;
         }
 
         public Task<User> GetWithUsersByIdAsync(int id)

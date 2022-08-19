@@ -2,6 +2,7 @@
 using API.DTO.Department;
 using API.Validators;
 using AutoMapper;
+using Core;
 using Core.Models;
 using Core.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[Action]")]
     [ApiController]
     public class DepartmentController : ControllerBase
     {
@@ -26,10 +27,10 @@ namespace API.Controllers
             _userService = userService;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<DepartmentDTO>>> GetAllDepartments()
         {
-            var claims = HttpContext?.User?.Identities?.FirstOrDefault()?.Claims.ToList();
+            //var claims = HttpContext?.User?.Identities?.FirstOrDefault()?.Claims.ToList();
 
             var departments = await _departmentService.GetAllDepartments().ToListAsync();
             var departmentResources = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentDTO>>(departments);
@@ -46,7 +47,7 @@ namespace API.Controllers
             return Ok(departmentResource);
         }
 
-        [HttpPost("")]
+        [HttpPost]
         public async Task<ActionResult<DepartmentDTO>> CreateDepartment([FromBody] SaveDepartmentDTO saveDepartmentResource)
         {
             var validator = new SaveDepartmentResourceValidator();
@@ -59,7 +60,14 @@ namespace API.Controllers
             var role = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).Select(x => x.Role).FirstOrDefaultAsync();
             var user = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
 
-            if (role == null || role.Name !="Leader")
+            var dep = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
+
+            if(user?.DepartmentId != 0)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "The user is participant of another department." });
+            }
+
+            if (role?.Name !="Leader" && role!=null)
             {
                 return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
             }
@@ -68,9 +76,9 @@ namespace API.Controllers
             var department = await _departmentService.GetDepartmentById(newDepartment.Id);
             var departmentResource = _mapper.Map<Department, DepartmentDTO>(department);
 
-            if(user.DepartmentId != departmentResource.Id)
+            if(user?.DepartmentId == departmentResource.Id)
             {
-                return BadRequest(new Response { Status = "Error", Message = "The leader is participant of another department." });
+                return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of custom department." });
             }
 
             return Ok(departmentResource);
@@ -94,7 +102,12 @@ namespace API.Controllers
             var role = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).Select(x => x.Role).FirstOrDefaultAsync();
             var user = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
 
-            if (role == null || role.Name != "Leader")
+            if (user?.DepartmentId != id)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of custom department." });
+            }
+
+            if (role?.Name != "Leader" && role != null)
             {
                 return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
             }
@@ -102,11 +115,6 @@ namespace API.Controllers
             await _departmentService.UpdateDepartment(departmentToBeUpdated, department);
             var updatedDepartment = await _departmentService.GetDepartmentById(id);
             var updatedDepartmentResource = _mapper.Map<Department, DepartmentDTO>(updatedDepartment);
-
-            if (user.DepartmentId != updatedDepartmentResource.Id)
-            {
-                return BadRequest(new Response { Status = "Error", Message = "The leader is participant of another department." });
-            }
 
             return Ok(updatedDepartmentResource);
         }

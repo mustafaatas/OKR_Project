@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220819112639_DepartmentIdSetAsANonNullableInUser")]
+    partial class DepartmentIdSetAsANonNullableInUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,6 +66,9 @@ namespace Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartmentId1")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
@@ -119,7 +124,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("DepartmentId1");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -168,7 +173,9 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeaderId");
+                    b.HasIndex("LeaderId")
+                        .IsUnique()
+                        .HasFilter("[LeaderId] IS NOT NULL");
 
                     b.ToTable("Departments");
                 });
@@ -430,11 +437,9 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
-                    b.HasOne("Core.Models.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Core.Models.Department", null)
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId1");
 
                     b.HasOne("Core.Auth.Role", "Role")
                         .WithMany("Users")
@@ -442,16 +447,15 @@ namespace Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Department");
-
                     b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Core.Models.Department", b =>
                 {
                     b.HasOne("Core.Auth.User", "Leader")
-                        .WithMany()
-                        .HasForeignKey("LeaderId");
+                        .WithOne("Department")
+                        .HasForeignKey("Core.Models.Department", "LeaderId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Leader");
                 });
@@ -582,6 +586,9 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Core.Auth.User", b =>
                 {
+                    b.Navigation("Department")
+                        .IsRequired();
+
                     b.Navigation("Objectives");
 
                     b.Navigation("TeamUsers");
@@ -595,6 +602,8 @@ namespace Data.Migrations
             modelBuilder.Entity("Core.Models.Department", b =>
                 {
                     b.Navigation("Objectives");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Core.Models.Objective", b =>

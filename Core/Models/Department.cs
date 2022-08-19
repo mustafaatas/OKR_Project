@@ -12,9 +12,7 @@ namespace Core.Models
         public List<Objective> Objectives { get; set; } = new List<Objective>();
 
         public Guid? LeaderId { get; set; }
-
         [ForeignKey("LeaderId")]
-
         public User? Leader { get; set; }
     }
 }
