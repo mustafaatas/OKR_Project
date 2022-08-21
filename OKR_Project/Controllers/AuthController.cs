@@ -19,7 +19,7 @@ using System.Text;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[Action]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -32,7 +32,9 @@ namespace API.Controllers
         private readonly IRoleService _roleService;
         private readonly IEmailSender _emailSender;
 
-        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, IEmailSender emailSender, IRoleService roleService)
+        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, 
+            SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, 
+            IEmailSender emailSender, IRoleService roleService, IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
             _userManager = userManager;
@@ -42,9 +44,11 @@ namespace API.Controllers
             _userService = userService;
             _emailSender = emailSender;
             _roleService = roleService;
+
+            var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
-        [HttpGet("GetAllRoles")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<RoleDTO>>> GetAllRoles()
         {
             var roles = _roleService.GetAllRoles();
@@ -53,7 +57,7 @@ namespace API.Controllers
             return Ok(rolesResources);
         }
 
-        [HttpGet("GetAllUsers")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
             var users = _userService.GetAllUsers();
@@ -63,7 +67,7 @@ namespace API.Controllers
         }
 
         //[Authorize(Roles = "Admin")]
-        [HttpPost("AddUser")]
+        [HttpPost]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
             var user = _mapper.Map<UserSignUpDTO, User>(userSignUpResource);
@@ -77,7 +81,7 @@ namespace API.Controllers
             return Problem(userCreateResult.Errors.First().Description, null, 500);
         }
 
-        [HttpPut("EditUser")]
+        [HttpPut]
         public async Task<IActionResult> EditUser([FromBody] UpdateUserDTO saveUserResource, string userEmail)
         {
             var userToBeUpdated = await _userManager.FindByEmailAsync(userEmail);
@@ -92,7 +96,7 @@ namespace API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("Signin")]
+        [HttpPost]
         public async Task<IActionResult> SignIn(UserLoginDTO userLoginDto)
         {
             var user = _userService.GetAllUsers().SingleOrDefault(u => u.UserName == userLoginDto.Email);
@@ -122,14 +126,14 @@ namespace API.Controllers
             return BadRequest(new Response { Status = "Error", Message = "Email or password incorrect." });
         }
 
-        [HttpPost("Logout")]
+        [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await _signManager.SignOutAsync();
             return Ok(new Response { Status = "Success", Message = "Logout success!" });
         }
 
-        [HttpPost("Roles")]
+        [HttpPost]
         public async Task<IActionResult> CreateRole(string roleName)
         {
             if (string.IsNullOrWhiteSpace(roleName))
@@ -153,7 +157,7 @@ namespace API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("ForgotPassword")]
+        [HttpPost]
         public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordTokenDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -170,7 +174,7 @@ namespace API.Controllers
         }
         
         [AllowAnonymous]
-        [HttpPost("ResetPassword")]
+        [HttpPost]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);

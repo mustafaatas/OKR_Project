@@ -8,11 +8,7 @@
 
         public string Status { get; set; }
 
-        //public float StartValue { get; set; }
-
-        //public float TargetValue { get; set; }
-
-        public float Interval { get; set; }//{ get { return TargetValue - StartValue; } }
+        public float Interval { get; set; }
 
         public int SurObjectiveId { get; set; }
     }

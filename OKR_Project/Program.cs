@@ -59,7 +59,7 @@ builder.Services.AddSwaggerGen(options =>
         };
 
         options.AddSecurityRequirement(security);
-        options.SwaggerDoc("v1", new OpenApiInfo { Title = "Music Market", Version = "v1" });
+        options.SwaggerDoc("v1", new OpenApiInfo { Title = "OKR Project", Version = "v1" });
     });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

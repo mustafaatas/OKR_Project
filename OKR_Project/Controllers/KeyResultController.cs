@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[Action]")]
     [ApiController]
     public class KeyResultController : ControllerBase
     {
@@ -26,7 +26,7 @@ namespace API.Controllers
             _objectiveService = objectiveService;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<KeyResultDTO>>> GetAllKeyResults()
         {
             var keyResults = _keyResultService.GetAllKeyResults();
@@ -44,7 +44,7 @@ namespace API.Controllers
             return Ok(keyResultResource);
         }
 
-        [HttpPost("")]
+        [HttpPost]
         public async Task<ActionResult<KeyResultDTO>> CreateKeyResult([FromBody] SaveKeyResultDTO saveKeyResultResource)
         {
             var validator = new SaveKeyResultResourceValidator();

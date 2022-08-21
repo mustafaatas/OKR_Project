@@ -11,10 +11,6 @@ namespace Core.Models
 
         public string Description { get; set; }
 
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
-        public DateTime? Deadline { get; set; }
-
         public Guid? UserId { get; set; }
 
         public User? User { get; set; }

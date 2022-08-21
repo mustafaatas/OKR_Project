@@ -11,10 +11,6 @@ namespace API.DTO.Objective
 
         public string? Description { get; set; }
 
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
-        public DateTime? Deadline { get; set; }
-
         public User? User { get; set; }
 
         public int DepartmentId { get; set; }

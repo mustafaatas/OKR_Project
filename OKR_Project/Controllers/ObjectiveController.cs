@@ -9,20 +9,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[Action]")]
     [ApiController]
     public class ObjectiveController : ControllerBase
     {
         private readonly IObjectiveService _objectiveService;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
+        private readonly ITeamService _teamService;
 
-        public ObjectiveController(IObjectiveService objectiveService, IMapper mapper)
+        public ObjectiveController(IObjectiveService objectiveService, IMapper mapper, IUserService userService, ITeamService teamService)
         {
             _mapper = mapper;
             _objectiveService = objectiveService;
+            _userService = userService;
+            _teamService = teamService;
         }
 
-        [HttpGet("")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<ObjectiveDTO>>> GetAllObjectives()
         {
             var objectives = _objectiveService.GetAllObjectives();
@@ -40,7 +44,7 @@ namespace API.Controllers
             return Ok(objectiveResource);
         }
 
-        [HttpPost("")]
+        [HttpPost]
         public async Task<ActionResult<ObjectiveDTO>> CreateObjective([FromBody] SaveObjectiveDTO saveObjectiveResource)
         {
             var validator = new SaveObjectiveResourceValidator();
@@ -50,25 +54,33 @@ namespace API.Controllers
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
             var objectiveToCreate = _mapper.Map<SaveObjectiveDTO, Objective>(saveObjectiveResource);
-            var user = await _objectiveService.GetAllObjectives().Where(x => x.UserId == saveObjectiveResource.UserId).Select(k => k.User).FirstOrDefaultAsync();
-            var isSelectedTeam = _objectiveService.GetAllObjectives().Any(x => x.TeamId == objectiveToCreate.TeamId);
+            var user = await _userService.GetAllUsers().Where(x => x.Id == saveObjectiveResource.UserId).FirstOrDefaultAsync();
+            var isSelectedTeam = _teamService.GetAllTeams().Any(x => x.Id == saveObjectiveResource.TeamId);
+            var teams = await _userService.GetAllUsers().Where(x => x.Id == saveObjectiveResource.UserId).Select(k => k.TeamUsers.Select(x => x.Team)).ToListAsync();
+            var isTeamIdInTeamIds = teams.Any(k => k.Any(k => k.Id == objectiveToCreate.TeamId));
 
-            if (!isSelectedTeam && objectiveToCreate.TeamId != null)
+            if(!isTeamIdInTeamIds)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "Cannot added objective to this team. Please select the team one of your belongs." });
+            }
+
+            if (isSelectedTeam && objectiveToCreate.TeamId != null)
             {
                 objectiveToCreate.DepartmentId = null;
             }
             else
             {
-                objectiveToCreate.DepartmentId = user.DepartmentId;
+                objectiveToCreate.DepartmentId = user?.DepartmentId;
             }
 
             var newObjective = await _objectiveService.CreateObjective(objectiveToCreate);
             var objective = await _objectiveService.GetObjectiveById(newObjective.Id);
             var objectiveResource = _mapper.Map<Objective, ObjectiveDTO>(objective);
+
             return Ok(objectiveResource);
         }
 
-        [HttpPost("CreateSubObjective")]
+        [HttpPost]
         public async Task<ActionResult<ObjectiveDTO>> CreateSubObjective([FromBody] SaveSubObjectiveDTO saveSubObjectiveResource)
         {
             var validator = new SaveSubObjectiveResourceValidator();

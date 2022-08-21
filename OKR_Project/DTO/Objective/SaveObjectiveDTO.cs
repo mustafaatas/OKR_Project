@@ -11,7 +11,5 @@ namespace API.DTO.Objective
         public virtual Guid UserId { get; set; }
 
         public int? TeamId { get; set; }
-
-        //public int? DepartmentId { get; set; }
     }
 }

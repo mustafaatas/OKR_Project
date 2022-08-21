@@ -21,10 +21,6 @@ namespace API.DTO.KeyResult
 
         public float Interval { get { return TargetValue - StartValue; } }
 
-        //public float ActualValue { get; set; }
-
-        //public string Status { get; set; }
-
         public int SurObjectiveId { get; set; }
     }
 }
