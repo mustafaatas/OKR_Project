@@ -43,7 +43,7 @@ namespace Service
 
         public async Task UpdateRole(Role roleToBeUpdated, Role role)
         {
-            roleToBeUpdated.Name = role.Name;
+            roleToBeUpdated.Id = role.Id;
             _unitOfWork.Commit();
         }
     }

@@ -71,6 +71,7 @@ builder.Services.AddTransient<IObjectiveService, ObjectiveService>();
 builder.Services.AddTransient<ITeamService, TeamService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IRoleService, RoleService>();
+builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton(emailConfig);
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 

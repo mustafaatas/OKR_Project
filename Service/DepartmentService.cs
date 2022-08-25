@@ -34,7 +34,7 @@ namespace Service
 
         public IQueryable<Department> GetAllDepartments()
         {
-            return _unitOfWork.Departments.GetAllAsync().Include(i => i.Leader).ThenInclude(i => i.Role);
+            return _unitOfWork.Departments.GetAllAsync().Include(i => i.Objectives).Include(i => i.Leader).ThenInclude(i => i.Role);
         }
 
         public async Task<Department> GetDepartmentById(int id)

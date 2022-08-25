@@ -21,6 +21,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
@@ -32,9 +33,9 @@ namespace API.Controllers
         private readonly IRoleService _roleService;
         private readonly IEmailSender _emailSender;
 
-        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager, 
-            SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService, 
-            IEmailSender emailSender, IRoleService roleService, IHttpContextAccessor httpContextAccessor)
+        public AuthController(IMapper mapper, UserManager<User> userManager, RoleManager<Role> roleManager,
+            SignInManager<User> signManager, IOptionsSnapshot<JwtSettings> jwtSettings, IUserService userService,
+            IEmailSender emailSender, IRoleService roleService)
         {
             _mapper = mapper;
             _userManager = userManager;
@@ -44,8 +45,6 @@ namespace API.Controllers
             _userService = userService;
             _emailSender = emailSender;
             _roleService = roleService;
-
-            var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
         [HttpGet]
@@ -66,7 +65,7 @@ namespace API.Controllers
             return Ok(usersResources);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
@@ -221,7 +220,7 @@ namespace API.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),               
             };
 
             var roleClaims = roles.Select(r => new Claim(ClaimTypes.Role, r));

@@ -9,11 +9,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
+    [Authorize]
     public class DepartmentController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;
@@ -27,10 +29,11 @@ namespace API.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DepartmentDTO>>> GetAllDepartments()
         {
-            //var claims = HttpContext?.User?.Identities?.FirstOrDefault()?.Claims.ToList();
+            var claims = HttpContext?.User?.Identities?.FirstOrDefault()?.Claims.ToList();
 
             var departments = await _departmentService.GetAllDepartments().ToListAsync();
             var departmentResources = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentDTO>>(departments);
@@ -38,6 +41,7 @@ namespace API.Controllers
             return Ok(departmentResources);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<DepartmentDTO>> GetDeparmentById(int id)
         {
@@ -47,6 +51,35 @@ namespace API.Controllers
             return Ok(departmentResource);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DepartmentDTO>>> GetDepartmentByUser()
+        {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _departmentService.GetDepartmentById(user.DepartmentId);
+            var departmentResource = _mapper.Map<Department, DepartmentDTO>(department);
+
+            return Ok(departmentResource);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DepartmentDTO>>> GetDepartmentByLeader()
+        {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _userService.GetAllUsers().Select(k => k.Department).Where(k => k.LeaderId == user.Id).FirstOrDefaultAsync();
+
+            if(department == null)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+            }
+
+            var departmentResource = _mapper.Map<Department, DepartmentDTO>(department);
+
+            return Ok(departmentResource);
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<DepartmentDTO>> CreateDepartment([FromBody] SaveDepartmentDTO saveDepartmentResource)
         {
@@ -84,6 +117,7 @@ namespace API.Controllers
             return Ok(departmentResource);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<DepartmentDTO>> UpdateDepartment(int id, [FromBody] SaveDepartmentDTO saveDepartmentResource)
         {
@@ -119,6 +153,7 @@ namespace API.Controllers
             return Ok(updatedDepartmentResource);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {

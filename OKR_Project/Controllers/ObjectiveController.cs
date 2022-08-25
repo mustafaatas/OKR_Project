@@ -4,6 +4,7 @@ using API.Validators;
 using AutoMapper;
 using Core.Models;
 using Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,21 +12,25 @@ namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
+    //[Authorize]
     public class ObjectiveController : ControllerBase
     {
         private readonly IObjectiveService _objectiveService;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly ITeamService _teamService;
+        private readonly IDepartmentService _departmentService;
 
-        public ObjectiveController(IObjectiveService objectiveService, IMapper mapper, IUserService userService, ITeamService teamService)
+        public ObjectiveController(IObjectiveService objectiveService, IMapper mapper, IUserService userService, ITeamService teamService, IDepartmentService departmentService)
         {
             _mapper = mapper;
             _objectiveService = objectiveService;
             _userService = userService;
             _teamService = teamService;
+            _departmentService = departmentService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ObjectiveDTO>>> GetAllObjectives()
         {
@@ -35,6 +40,7 @@ namespace API.Controllers
             return Ok(objectivesResources);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ObjectiveDTO>> GetObjectiveById(int id)
         {
@@ -44,9 +50,45 @@ namespace API.Controllers
             return Ok(objectiveResource);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<ObjectiveDTO>> GetObjectivesByUser()
+        {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var objectives = await _objectiveService.GetAllObjectives().Where(k => k.UserId == user.Id).ToListAsync();
+
+            return Ok(objectives);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<ObjectiveDTO>> GetObjectivesByDepartment()
+        {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+            var objectives = department?.Objectives.ToList();
+
+            if (objectives == null)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+            }
+
+            return Ok(objectives);
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ObjectiveDTO>> CreateObjective([FromBody] SaveObjectiveDTO saveObjectiveResource)
         {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+
+            if (department?.Id != saveObjectiveResource.DepartmentId)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
+            }
+
             var validator = new SaveObjectiveResourceValidator();
             var validationResult = await validator.ValidateAsync(saveObjectiveResource);
 
@@ -54,23 +96,20 @@ namespace API.Controllers
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
             var objectiveToCreate = _mapper.Map<SaveObjectiveDTO, Objective>(saveObjectiveResource);
-            var user = await _userService.GetAllUsers().Where(x => x.Id == saveObjectiveResource.UserId).FirstOrDefaultAsync();
+            //var user = await _userService.GetAllUsers().Where(x => x.Id == saveObjectiveResource.UserId).FirstOrDefaultAsync();
             var isSelectedTeam = _teamService.GetAllTeams().Any(x => x.Id == saveObjectiveResource.TeamId);
+            var isSelectedDepartment = _departmentService.GetAllDepartments().Any(x => x.Id == saveObjectiveResource.DepartmentId);
             var teams = await _userService.GetAllUsers().Where(x => x.Id == saveObjectiveResource.UserId).Select(k => k.TeamUsers.Select(x => x.Team)).ToListAsync();
             var isTeamIdInTeamIds = teams.Any(k => k.Any(k => k.Id == objectiveToCreate.TeamId));
 
-            if(!isTeamIdInTeamIds)
+            if(!isTeamIdInTeamIds && saveObjectiveResource.TeamId != null)
             {
                 return BadRequest(new Response { Status = "Error", Message = "Cannot added objective to this team. Please select the team one of your belongs." });
             }
 
-            if (isSelectedTeam && objectiveToCreate.TeamId != null)
+            if (!(isSelectedTeam || isSelectedDepartment))
             {
-                objectiveToCreate.DepartmentId = null;
-            }
-            else
-            {
-                objectiveToCreate.DepartmentId = user?.DepartmentId;
+                return BadRequest(new Response { Status = "Error", Message = "Objective has to be part of department or team" });
             }
 
             var newObjective = await _objectiveService.CreateObjective(objectiveToCreate);
@@ -80,9 +119,19 @@ namespace API.Controllers
             return Ok(objectiveResource);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ObjectiveDTO>> CreateSubObjective([FromBody] SaveSubObjectiveDTO saveSubObjectiveResource)
         {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+
+            if (department?.Id != saveSubObjectiveResource.SurObjectiveId)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
+            }
+
             var validator = new SaveSubObjectiveResourceValidator();
             var validationResult = await validator.ValidateAsync(saveSubObjectiveResource);
 
@@ -100,9 +149,19 @@ namespace API.Controllers
             return Ok(subObjectiveResource);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ObjectiveDTO>> UpdateObjective(int id, [FromBody] SaveObjectiveDTO saveObjectiveResource)
         {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+
+            if (department?.Id != saveObjectiveResource.DepartmentId)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
+            }
+
             var validator = new SaveObjectiveResourceValidator();
             var validationResult = await validator.ValidateAsync(saveObjectiveResource);
 
@@ -121,11 +180,31 @@ namespace API.Controllers
             return Ok(updatedObjectiveResource);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteObjective(int id)
         {
             var objective = await _objectiveService.GetObjectiveById(id);
             await _objectiveService.DeleteObjective(objective);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteObjectiveByDepartment(int id)
+        {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+            var objective = department?.Objectives.Where(k => k.Id == 24).FirstOrDefault();
+
+            if(objective == null)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
+            }
+
+            var objectiveToDeleted = await _objectiveService.GetObjectiveById(objective.Id);
+            await _objectiveService.DeleteObjective(objectiveToDeleted);
 
             return NoContent();
         }

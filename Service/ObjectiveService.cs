@@ -21,6 +21,13 @@ namespace Service
 
         public async Task<Objective> CreateObjective(Objective newObjective)
         {
+            if(newObjective.SurObjectiveId != null)
+            {
+                var objective = _unitOfWork.Objectives.GetAllAsync().Where(k => k.Id == newObjective.SurObjectiveId).FirstOrDefault();
+                newObjective.DepartmentId = objective?.DepartmentId;
+                newObjective.TeamId = objective?.TeamId;
+            }
+
             await _unitOfWork.Objectives.AddAsync(newObjective);
             _unitOfWork.Commit();
             return newObjective;
@@ -57,7 +64,7 @@ namespace Service
 
         public IQueryable<Objective> GetAllObjectives()
         {
-            return _unitOfWork.Objectives.GetAllAsync().Include(i => i.User).Include(i => i.KeyResults).Include(i => i.User);
+            return _unitOfWork.Objectives.GetAllAsync().Include(i => i.SubObjectives).Include(i => i.User).Include(i => i.KeyResults).Include(i => i.User);
         }
 
         public async Task<Objective> GetObjectiveById(int id)

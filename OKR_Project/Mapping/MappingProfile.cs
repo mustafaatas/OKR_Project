@@ -48,11 +48,6 @@ namespace API.Mapping
 
             CreateMap<UserSignUpDTO, User>()
             .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
-
-            //Action<UserSignUpDTO> emailExpr = ur => ur.Email.Split('@').FirstOrDefault();
-
-            //CreateMap<UserSignUpDTO, User>()
-            //.ForMember(u => u.UserName, opt => opt.MapFrom(ur => emailExpr));
         }
     }
 

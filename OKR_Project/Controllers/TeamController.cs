@@ -4,37 +4,39 @@ using AutoMapper;
 using Core;
 using Core.Models;
 using Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class TeamController : ControllerBase
     {
         private readonly ITeamService _teamService;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public TeamController(ITeamService teamService, IMapper mapper, IUserService userService, IUnitOfWork unitOfWork)
+        public TeamController(ITeamService teamService, IMapper mapper, IUserService userService)
         {
             _mapper = mapper;
             _teamService = teamService;
             _userService = userService;
-            _unitOfWork = unitOfWork;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TeamDTO>>> GetAllTeams()
         {
-            //HttpContext.User.Claims
             var teams = _teamService.GetAllTeams().ToList();
             var teamResources = _mapper.Map<IEnumerable<Team>, IEnumerable<TeamDTO>>(teams);
 
             return Ok(teamResources);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<TeamDTO>> GetTeamById(int id)
         {
@@ -44,6 +46,17 @@ namespace API.Controllers
             return Ok(teamResource);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<TeamDTO>> GetTeamsByUserId()
+        {
+            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+            var teams = _teamService.GetAllTeams().Select(k => k.TeamUsers.Select(k => k.User)).FirstOrDefault().Where(k => k.Id == user.Id).Select(k=>k.TeamUsers.Select(k => k.Team)).ToList();
+
+            return Ok(teams);
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<TeamDTO>> CreateTeam([FromBody] SaveTeamDTO saveTeamResource)
         {
@@ -58,14 +71,13 @@ namespace API.Controllers
 
             _teamService.CreateTeam(teamToCreate);
 
-            //_unitOfWork.Commit();
-
             var teamResource = _mapper.Map<Team, TeamDTO>(teamToCreate);
             return Ok(teamResource);
 
             //Controller ve service arasındaki ilişkiyi düzelt.
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<ActionResult<SaveTeamDTO>> UpdateTeam(SaveTeamDTO teamDto, int TeamId)
         {
@@ -88,6 +100,7 @@ namespace API.Controllers
             return Ok(updatedTeamResource);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTeam(int id)
         {
