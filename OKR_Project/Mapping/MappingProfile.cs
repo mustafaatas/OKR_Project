@@ -8,6 +8,7 @@ using API.DTO.UserDTO;
 using AutoMapper;
 using Core.Auth;
 using Core.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Mapping
 {
@@ -23,7 +24,7 @@ namespace API.Mapping
             CreateMap<Objective, ObjectiveDTO>();
             CreateMap<Team, TeamDTO>();
             CreateMap<User, UpdateUserDTO>();
-            CreateMap<User, UserDTO>().ConvertUsing<UserDTOConverter>();
+            CreateMap<User, UserDTO>();
             CreateMap<Role, RoleDTO>();
 
             // Resource to Domain
@@ -48,22 +49,6 @@ namespace API.Mapping
 
             CreateMap<UserSignUpDTO, User>()
             .ForMember(u => u.UserName, opt => opt.MapFrom(ur => ur.Email));
-        }
-    }
-
-    public class UserDTOConverter : ITypeConverter<User, UserDTO>
-    {
-        public UserDTO Convert(User source, UserDTO destination, ResolutionContext context)
-        {
-            return new UserDTO
-            {
-                Email = source.Email,
-                FirstName = source.FirstName,
-                LastName = source.LastName,
-                RoleName = source?.Role?.Name,
-                TeamNames = source?.TeamUsers.Select(p => p.Team.Name).ToList(),
-                DepartmentName = source?.Department?.Name
-            };
         }
     }
 }

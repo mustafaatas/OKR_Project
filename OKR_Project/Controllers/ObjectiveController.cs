@@ -12,7 +12,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ObjectiveController : ControllerBase
     {
         private readonly IObjectiveService _objectiveService;
@@ -60,6 +60,7 @@ namespace API.Controllers
             return Ok(objectives);
         }
 
+
         [HttpGet]
         public async Task<ActionResult<ObjectiveDTO>> GetObjectivesByDepartment()
         {
@@ -76,17 +77,23 @@ namespace API.Controllers
             return Ok(objectives);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Leader")]
         [HttpPost]
         public async Task<ActionResult<ObjectiveDTO>> CreateObjective([FromBody] SaveObjectiveDTO saveObjectiveResource)
         {
-            var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
-            var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
-            var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
-
-            if (department?.Id != saveObjectiveResource.DepartmentId)
+            try
             {
-                return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
+                var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
+                var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+                var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+                if (department.Id != saveObjectiveResource.DepartmentId)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
+                }
+            }
+            catch(Exception ex)
+            {
+                throw ex;
             }
 
             var validator = new SaveObjectiveResourceValidator();

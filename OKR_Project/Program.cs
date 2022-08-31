@@ -91,16 +91,16 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddControllers();
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddHttpContextAccessor();
+//builder.Services.AddHttpContextAccessor();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Events.OnSignedIn = (context) =>
-    {
-        context.HttpContext.User = context.Principal;
-        return Task.CompletedTask;
-    };
-});
+//builder.Services.ConfigureApplicationCookie(options =>
+//{
+//    options.Events.OnSignedIn = (context) =>
+//    {
+//        context.HttpContext.User = context.Principal;
+//        return Task.CompletedTask;
+//    };
+//});
 
 
 // Proje bazýnda authorization

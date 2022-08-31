@@ -1,9 +1,11 @@
-﻿namespace API.DTO.KeyResult
+﻿using Core.Enums;
+
+namespace API.DTO.KeyResult
 {
     public class UpdateKeyResultDTO
     {
         public float ActualValue { get; set; }
 
-        public string Status { get; set; }
+        public Status Status { get; set; }
     }
 }

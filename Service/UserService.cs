@@ -15,10 +15,14 @@ namespace Service
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly UserManager<User> _userManager;
 
-        public UserService(IUnitOfWork unitOfWork)
+        public UserService(IUnitOfWork unitOfWork, RoleManager<Role> roleManager, UserManager<User> userManager)
         {
             _unitOfWork = unitOfWork;
+            _roleManager = roleManager;
+            _userManager = userManager;
         }
 
         public async Task<User> CreateUser(User newUser)
@@ -44,9 +48,16 @@ namespace Service
             return await _unitOfWork.Users.GetByIdAsync(id);
         }
 
-        public async Task UpdateUser(User userToBeUpdated, User user)
+        public async Task UpdateUser(User user, Role role)
         {
-            userToBeUpdated.RoleId = user.RoleId;
+            //add userda yaptığın işlemleri yap, varsa önceki rolleri sil
+            var roles = await _userManager.GetRolesAsync(user);
+
+            await _userManager.RemoveFromRolesAsync(user, roles);
+
+            await _userManager.AddToRoleAsync(user, role.Name);
+
+            
             _unitOfWork.Commit();
         }
 

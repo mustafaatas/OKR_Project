@@ -21,7 +21,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
@@ -70,16 +70,24 @@ namespace API.Controllers
         public async Task<IActionResult> AddUser(UserSignUpDTO userSignUpResource)
         {
             var user = _mapper.Map<UserSignUpDTO, User>(userSignUpResource);
-            var userCreateResult = await _userManager.CreateAsync(user, userSignUpResource.Password);
+            var role = _roleManager.Roles.Where(k => k.Id == userSignUpResource.RoleId).FirstOrDefault();
+            if (role == null)
+            {
+                return BadRequest();
+            }
 
+            var userCreateResult = await _userManager.CreateAsync(user, userSignUpResource.Password);
             if (userCreateResult.Succeeded)
             {
+
+                await _userManager.AddToRoleAsync(user, role.Name);
                 return Created(string.Empty, string.Empty);
             }
 
             return Problem(userCreateResult.Errors.First().Description, null, 500);
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> EditUser([FromBody] UpdateUserDTO saveUserResource, string userEmail)
         {
@@ -87,8 +95,8 @@ namespace API.Controllers
             if (userToBeUpdated == null)
                 return StatusCode(StatusCodes.Status404NotFound, new Response { Status = "Error", Message = "User does not exists!" });
 
-            var user = _mapper.Map<UpdateUserDTO, User>(saveUserResource);
-            await _userService.UpdateUser(userToBeUpdated, user);
+            var role = await _roleManager.Roles.Where(k => k.Id == saveUserResource.RoleId).FirstOrDefaultAsync();
+            await _userService.UpdateUser(userToBeUpdated, role);
             var updatedUser = await _userManager.FindByEmailAsync(userEmail);
             var updatedUserResource = _mapper.Map<User, UpdateUserDTO>(updatedUser);
             return Ok(updatedUserResource);
@@ -108,17 +116,16 @@ namespace API.Controllers
 
             if (userSigninResult)
             {
-                var role = await _userManager.GetRolesAsync(user);
+                var roles = await _userManager.GetRolesAsync(user);
 
                 return Ok(new
                 {
-                    Jwt = GenerateJwt(user, role),
+                    Jwt = GenerateJwt(user, roles),
                     Name = user.FirstName,
                     Surname = user.LastName,
-                    UserRole = user.Role.Name,
+                    UserRole = roles.FirstOrDefault(),
                     UserTeamsName = string.Join(";", user.TeamUsers.Select(p => p.Team.Name).ToList()), 
                     UserDepartmentName = user?.Department?.Name
-                    //UserDepartmentName = _userService.GetDepartmentOfUser(user.Id) --> Dogru ve calisiyor
                 });
             }
 

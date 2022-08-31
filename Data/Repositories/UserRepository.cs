@@ -15,7 +15,7 @@ namespace Data.Repositories
 
         public IQueryable<User> GetUsersWithInclude()
         {
-            return DataContext.Users.Include(i => i.Role).Include(i => i.Department).Include(i => i.TeamUsers).ThenInclude(i => i.Team).AsQueryable(); ;
+            return DataContext.Users.Include(i => i.Department).Include(i => i.TeamUsers).ThenInclude(i => i.Team).AsQueryable(); ;
         }
 
         public Task<User> GetWithUsersByIdAsync(int id)

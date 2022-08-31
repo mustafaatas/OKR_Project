@@ -3,10 +3,12 @@ using API.DTO.Department;
 using API.Validators;
 using AutoMapper;
 using Core;
+using Core.Auth;
 using Core.Models;
 using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -15,18 +17,20 @@ namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class DepartmentController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
 
-        public DepartmentController(IDepartmentService departmentService, IMapper mapper, IUserService userService)
+        public DepartmentController(IDepartmentService departmentService, IMapper mapper, IUserService userService, UserManager<User> userManager)
         {
             _mapper = mapper;
             _departmentService = departmentService;
             _userService = userService;
+            _userManager = userManager;
         }
 
         [Authorize(Roles = "Admin")]
@@ -56,10 +60,18 @@ namespace API.Controllers
         {
             var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
             var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
-            var department = await _departmentService.GetDepartmentById(user.DepartmentId);
-            var departmentResource = _mapper.Map<Department, DepartmentDTO>(department);
+            if (user.DepartmentId.HasValue)
+            {
 
-            return Ok(departmentResource);
+                var department = await _departmentService.GetDepartmentById(user.DepartmentId.Value);
+                var departmentResource = _mapper.Map<Department, DepartmentDTO>(department);
+
+                return Ok(departmentResource);
+            }
+
+            //departman bulunamadı
+            return BadRequest();
+
         }
 
         [HttpGet]
@@ -79,7 +91,7 @@ namespace API.Controllers
             return Ok(departmentResource);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<DepartmentDTO>> CreateDepartment([FromBody] SaveDepartmentDTO saveDepartmentResource)
         {
@@ -90,34 +102,30 @@ namespace API.Controllers
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
             var departmentToCreate = _mapper.Map<SaveDepartmentDTO, Department>(saveDepartmentResource);
-            var role = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).Select(x => x.Role).FirstOrDefaultAsync();
             var user = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
+            //userı bulduktan sonra userın rolünü bul
+            var role = await _userManager.GetRolesAsync(user);
 
             var dep = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
 
-            if(user != null)
-            {
-                return BadRequest(new Response { Status = "Error", Message = "The user is participant of another department." });
-            }
-
-            if (role?.Name !="Leader" && role!=null)
+            if (role.FirstOrDefault() != "Leader" && role != null)
             {
                 return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+            }
+
+            if (user != null)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "The user is participant of another department." });
             }
 
             var newDepartment = await _departmentService.CreateDepartment(departmentToCreate);
             var department = await _departmentService.GetDepartmentById(newDepartment.Id);
             var departmentResource = _mapper.Map<Department, DepartmentDTO>(department);
 
-            if(user?.DepartmentId == departmentResource.Id)
-            {
-                return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of custom department." });
-            }
-
             return Ok(departmentResource);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<DepartmentDTO>> UpdateDepartment(int id, [FromBody] SaveDepartmentDTO saveDepartmentResource)
         {
@@ -133,17 +141,18 @@ namespace API.Controllers
                 return NotFound();
 
             var department = _mapper.Map<SaveDepartmentDTO, Department>(saveDepartmentResource);
-            var role = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).Select(x => x.Role).FirstOrDefaultAsync();
             var user = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
+            //userı bulduktan sonra userın rolünü bul
+            var role = await _userManager.GetRolesAsync(user);
+
+            if (role.FirstOrDefault() != "Leader" && role != null)
+            {
+                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+            }
 
             if (user?.DepartmentId != id)
             {
-                return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of custom department." });
-            }
-
-            if (role?.Name != "Leader" && role != null)
-            {
-                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+                return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of current department." });
             }
 
             await _departmentService.UpdateDepartment(departmentToBeUpdated, department);

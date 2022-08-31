@@ -39,12 +39,6 @@ namespace Data
                 .Entity<TeamUser>()
                 .HasOne(s => s.User);
 
-            builder
-                .Entity<User>()
-                .HasOne<Role>(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.RoleId)
-                .OnDelete(DeleteBehavior.NoAction);
 
             //builder
             //    .Entity<Department>()

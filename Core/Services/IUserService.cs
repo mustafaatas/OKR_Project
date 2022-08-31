@@ -13,7 +13,7 @@ namespace Core.Services
         IQueryable<User> GetAllUsers();
         Task<User> GetUserById(int id);
         Task<User> CreateUser(User newUser);
-        Task UpdateUser(User userToBeUpdated, User user);
+        Task UpdateUser(User user, Role role);
         Task DeleteUser(User user);
         string GetDepartmentOfUser(Guid userId);
     }

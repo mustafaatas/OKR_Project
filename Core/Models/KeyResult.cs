@@ -12,9 +12,11 @@ namespace Core.Models
 
         public string Description { get; set; }
 
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime? Deadline { get; set; }
 
-        public string MeasurementUnit { get; set; }
+        public MeasurementUnit MeasurementUnit { get; set; }
 
         public float StartValue { get; set; }
 
@@ -25,7 +27,7 @@ namespace Core.Models
 
         public float ActualValue { get; set; }
 
-        public string Status { get; set; } = "Open";
+        public Status Status { get; set; } = Status.Open;
 
         public int SurObjectiveId { get; set; }
 
