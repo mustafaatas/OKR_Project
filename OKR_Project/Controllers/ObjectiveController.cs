@@ -2,9 +2,11 @@
 using API.DTO.Objective;
 using API.Validators;
 using AutoMapper;
+using Core.Auth;
 using Core.Models;
 using Core.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +14,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ObjectiveController : ControllerBase
     {
         private readonly IObjectiveService _objectiveService;
@@ -20,17 +22,19 @@ namespace API.Controllers
         private readonly IUserService _userService;
         private readonly ITeamService _teamService;
         private readonly IDepartmentService _departmentService;
+        private readonly UserManager<User> _userManager;
 
-        public ObjectiveController(IObjectiveService objectiveService, IMapper mapper, IUserService userService, ITeamService teamService, IDepartmentService departmentService)
+        public ObjectiveController(IObjectiveService objectiveService, IMapper mapper, IUserService userService, ITeamService teamService, IDepartmentService departmentService, UserManager<User> userManager)
         {
             _mapper = mapper;
             _objectiveService = objectiveService;
             _userService = userService;
             _teamService = teamService;
             _departmentService = departmentService;
+            _userManager = userManager;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ObjectiveDTO>>> GetAllObjectives()
         {
@@ -60,7 +64,7 @@ namespace API.Controllers
             return Ok(objectives);
         }
 
-
+        //[Authorize(Roles = "Admin, Leader")]
         [HttpGet]
         public async Task<ActionResult<ObjectiveDTO>> GetObjectivesByDepartment()
         {
@@ -69,15 +73,10 @@ namespace API.Controllers
             var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
             var objectives = department?.Objectives.ToList();
 
-            if (objectives == null)
-            {
-                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
-            }
-
             return Ok(objectives);
         }
 
-        [Authorize(Roles = "Admin, Leader")]
+        //[Authorize(Roles = "Admin, Leader")]
         [HttpPost]
         public async Task<ActionResult<ObjectiveDTO>> CreateObjective([FromBody] SaveObjectiveDTO saveObjectiveResource)
         {
@@ -86,7 +85,9 @@ namespace API.Controllers
                 var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
                 var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
                 var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
-                if (department.Id != saveObjectiveResource.DepartmentId)
+                var role = await _userManager.GetRolesAsync(user);
+                var roleName = role.FirstOrDefault();
+                if (department.Id != saveObjectiveResource.DepartmentId && roleName != "Admin")
                 {
                     return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
                 }
@@ -133,8 +134,10 @@ namespace API.Controllers
             var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
             var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
             var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
+            var role = await _userManager.GetRolesAsync(user);
+            var roleName = role.FirstOrDefault();
 
-            if (department?.Id != saveSubObjectiveResource.SurObjectiveId)
+            if (department?.Id != saveSubObjectiveResource.SurObjectiveId && roleName != "Admin")
             {
                 return BadRequest(new Response { Status = "Error", Message = "You don't have authorize to this objective" });
             }

@@ -1,4 +1,5 @@
-﻿using Core.Models;
+﻿using Core.Enums;
+using Core.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace API.DTO.KeyResult
@@ -13,7 +14,7 @@ namespace API.DTO.KeyResult
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
         public DateTime? Deadline { get; set; }
 
-        public string MeasurementUnit { get; set; }
+        public MeasurementUnit MeasurementUnit { get; set; }
 
         public float StartValue { get; set; }
 
