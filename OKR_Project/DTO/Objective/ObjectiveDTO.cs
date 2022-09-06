@@ -11,9 +11,13 @@ namespace API.DTO.Objective
 
         public string? Description { get; set; }
 
-        public User? User { get; set; }
+        //public User? User { get; set; }
 
-        public int DepartmentId { get; set; }
+        //public int DepartmentId { get; set; }
+
+        public string Owner { get; set; }
+
+        public string DepartmentName { get; set; }
 
         public int TeamId { get; set; }
 

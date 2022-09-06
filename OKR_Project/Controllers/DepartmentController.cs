@@ -71,7 +71,6 @@ namespace API.Controllers
 
             //departman bulunamadı
             return BadRequest();
-
         }
 
         [HttpGet]
@@ -104,17 +103,17 @@ namespace API.Controllers
             var departmentToCreate = _mapper.Map<SaveDepartmentDTO, Department>(saveDepartmentResource);
             var user = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
             //userı bulduktan sonra userın rolünü bul
-            var role = await _userManager.GetRolesAsync(user);
-
-            var dep = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
-
-            if (role.FirstOrDefault() != "Leader" && role != null)
+            if(user != null)
             {
-                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
-            }
+                var role = await _userManager.GetRolesAsync(user);
 
-            if (user != null)
-            {
+                var dep = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
+
+                if (role.FirstOrDefault() != "Leader" && role != null)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+                }
+
                 return BadRequest(new Response { Status = "Error", Message = "The user is participant of another department." });
             }
 
@@ -136,25 +135,27 @@ namespace API.Controllers
                 return BadRequest(validationResult.Errors); // this needs refining, but for demo it is ok
 
             var departmentToBeUpdated = await _departmentService.GetDepartmentById(id);
-
             if (departmentToBeUpdated == null)
                 return NotFound();
 
             var department = _mapper.Map<SaveDepartmentDTO, Department>(saveDepartmentResource);
             var user = await _userService.GetAllUsers().Where(x => x.Id == saveDepartmentResource.LeaderId).FirstOrDefaultAsync();
-            //userı bulduktan sonra userın rolünü bul
-            var role = await _userManager.GetRolesAsync(user);
 
-            if (role.FirstOrDefault() != "Leader" && role != null)
+            if(user != null)
             {
-                return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
-            }
+                var role = await _userManager.GetRolesAsync(user);
 
-            if (user?.DepartmentId != id)
-            {
-                return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of current department." });
-            }
+                if (role.FirstOrDefault() != "Leader" && role != null)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "The user is not leader" });
+                }
 
+                if (user?.DepartmentId != id)
+                {
+                    return BadRequest(new Response { Status = "Error", Message = "The leader is not participant of current department." });
+                }
+            }
+            
             await _departmentService.UpdateDepartment(departmentToBeUpdated, department);
             var updatedDepartment = await _departmentService.GetDepartmentById(id);
             var updatedDepartmentResource = _mapper.Map<Department, DepartmentDTO>(updatedDepartment);

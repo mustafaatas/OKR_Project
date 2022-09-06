@@ -1,24 +1,20 @@
-﻿using AutoMapper;
-using Core.Enums;
+﻿using Core.Enums;
 using Core.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
     [Route("api/[controller]/[Action]")]
-    [ApiController]
+    [ApiController] 
     public class ProfileController : ControllerBase
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IObjectiveService _objectiveService;
         private readonly IKeyResultService _keyResultService;
 
-        public ProfileController(IMapper mapper, IObjectiveService objectService, IUserService userService, IKeyResultService keyResultService)
+        public ProfileController(IObjectiveService objectService, IUserService userService, IKeyResultService keyResultService)
         {
-            _mapper = mapper;
             _objectiveService = objectService;
             _userService = userService;
             _keyResultService = keyResultService;
@@ -59,7 +55,6 @@ namespace API.Controllers
             var keyResultsWhichAreCompletedSuccessfully = keyResultsWhichAreCompleted.Where(k => k.ActualValue == 100).Count();
 
             return Ok(keyResultsWhichAreCompletedSuccessfully);
-
         }
     }
 }

@@ -62,6 +62,13 @@ namespace API.Controllers
             var users = _userService.GetAllUsers();
             var usersResources = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
 
+            foreach (var userResource in usersResources)
+            {
+                var user = users.Where(k => k.Id == userResource.Id).FirstOrDefault();
+                userResource.RoleName = _userManager.GetRolesAsync(user).Result.FirstOrDefault();
+                userResource.DepartmentName = user.Department?.Name;
+            }
+
             return Ok(usersResources);
         }
 

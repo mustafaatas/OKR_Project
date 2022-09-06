@@ -39,7 +39,18 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<ObjectiveDTO>>> GetAllObjectives()
         {
             var objectives = _objectiveService.GetAllObjectives();
-            var objectivesResources = _mapper.Map<IEnumerable<Objective>, IEnumerable<ObjectiveDTO>>(objectives);
+            var objectivesResources = objectives.Select(k => new ObjectiveDTO
+            {
+                Id = k.Id,
+                Title = k.Title,
+                Owner = k.User.FirstName + " " + k.User.LastName,
+                Description = k.Description,
+                DepartmentName = k.Department.Name,
+                //TeamId = k.Team.Id,
+                //SurObjectiveId = k.SurObjective.Id,
+                //KeyResults = k.KeyResults,
+                //SubObjectives = k.SubObjectives
+            }).ToList();
 
             return Ok(objectivesResources);
         }
@@ -59,6 +70,8 @@ namespace API.Controllers
         {
             var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
             var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+
+            
             var objectives = await _objectiveService.GetAllObjectives().Where(k => k.UserId == user.Id).ToListAsync();
 
             return Ok(objectives);
@@ -66,10 +79,11 @@ namespace API.Controllers
 
         //[Authorize(Roles = "Admin, Leader")]
         [HttpGet]
-        public async Task<ActionResult<ObjectiveDTO>> GetObjectivesByDepartment()
+        public async Task<ActionResult<ObjectiveDTO>> GetObjectivesByDepartment(HttpContext httpContext)
         {
             var mail = HttpContext.User.Identities.Select(k => k.Name).FirstOrDefault();
             var user = await _userService.GetAllUsers().Where(x => x.Email == mail).FirstOrDefaultAsync();
+
             var department = await _departmentService.GetAllDepartments().Where(x => x.LeaderId == user.Id).FirstOrDefaultAsync();
             var objectives = department?.Objectives.ToList();
 
